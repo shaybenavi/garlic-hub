@@ -40,6 +40,9 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class DatatablePreparer extends AbstractDatatablePreparer
 {
+	/**
+	 * @var array<int,bool>
+	 */
 	private array $usedTemplates = [];
 
 	public function __construct(PrepareService $prepareService, private readonly AclValidator $aclValidator, Parameters $parameters)
@@ -56,11 +59,16 @@ class DatatablePreparer extends AbstractDatatablePreparer
 		return $this;
 	}
 
-
 	/**
 	 * This method is cringe, but I do not have a better idea without starting over engineering
 	 *
-	 * @param list<array<string,mixed>> $currentFilterResults
+	 * @param list<array{UID: int,
+	 *      company_id: int,
+	 *      template_id: int,
+	 *      type: string, used:int,
+	 *      name:string,
+	 *      username:string,
+	 *     ...}> $currentFilterResults
 	 * @param list<HeaderField> $fields
 	 * @param int $currentUID
 	 * @return list<array<string,mixed>>
@@ -108,40 +116,41 @@ class DatatablePreparer extends AbstractDatatablePreparer
 						);
 						break;
 					default:
-						$resultElements['is_text'] = $this->prepareService->getBodyPreparer()->formatText($template[$innerKey]);
+						$resultElements['is_text'] = $this->prepareService->getBodyPreparer()->formatText((string)$template[$innerKey]);
 						break;
 				}
 				$list['elements_result_element'][] = $resultElements;
-				if ($template['UID'] == $currentUID || $this->aclValidator->isTemplateEditable($currentUID, $template))
-				{
-					$list['has_action_link'] = [
-						$this->prepareService->getBodyPreparer()->formatActionLink(
-							$this->translator->translate('composer', 'templates'),
-							'templates/composer/'.$template['template_id'],
-							'composer', (string) $template['template_id'], 'columns'),
-						$this->prepareService->getBodyPreparer()->formatActionLink(
-							$this->translator->translate('settings', 'main'),
-							'templates/settings/'.$template['template_id'],
-							'edit', (string) $template['template_id'], 'gear')
-					];
-					if (!array_key_exists($template['template_id'], $this->usedTemplates) &&
-						$this->aclValidator->isAllowedToDeleteTemplate($currentUID, $template))
-					{
-						$deleteText = $this->translator->translate('confirm_delete', 'templates');
-						$list['has_delete'] = $this->prepareService->getBodyPreparer()->formatActionDelete(
-							$this->translator->translate('delete', 'main'),
-							sprintf($deleteText, $template['name']),
-							(string) $template['template_id'],
-							'delete-template'
-						);
-					}
-
-				}
+			}
+			if ($template['UID'] == $currentUID || $this->aclValidator->isTemplateEditable($currentUID, $template))
+			{
+				$list['has_action'][] = $this->prepareService->getBodyPreparer()->formatAction(
+					$this->translator->translate('actions', 'templates'),
+					'template-contextmenu',
+					(string) $template['template_id'],
+					'three-dots template-contextmenu',
+				);
 			}
 			$body[] = $list;
 		}
 
 		return $body;
+	}
+
+	/**
+	 * @return array<string,string>
+	 * @throws CoreException
+	 * @throws FrameworkException
+	 * @throws InvalidArgumentException
+	 * @throws PhpfastcacheSimpleCacheException
+	 */
+	public function formatContextMenu(): array
+	{
+		return [
+			'LANG_COMPOSE' => $this->translator->translate('composer', 'templates'),
+			'LANG_SETTINGS' => $this->translator->translate('settings', 'main'),
+			'LANG_TEMPLATE_DELETE' => $this->translator->translate('delete', 'main'),
+			'LANG_TEMPLATE_DELETE_CONFIRM' => $this->translator->translate('confirm_delete', 'templates')
+		];
 	}
 
 

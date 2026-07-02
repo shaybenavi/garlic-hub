@@ -69,6 +69,7 @@ readonly class ShowDatatableController
 		$dataGrid = $this->facade->prepareUITemplate();
 
 		$templateData = $this->templateFormatter->preparerUITemplate($dataGrid);
+		$templateData['this_layout']['data']['templates_actions_contextmenu'] = $this->facade->prepareContextMenu();
 		$response->getBody()->write(serialize($templateData));
 
 		return $response->withHeader('Content-Type', 'text/html')->withStatus(200);

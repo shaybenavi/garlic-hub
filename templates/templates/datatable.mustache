@@ -1,1 +1,16 @@
 {{> datatable}}
+<template id="templateActionsContextMenuTemplate">
+	{{#templates_actions_contextmenu}}
+	<ul class="context-menu">
+		<li class="compose">
+			<a href="">{{{LANG_COMPOSE}}}</a>
+		</li>
+		<li class="settings">
+			<a href="">{{{LANG_SETTINGS}}}</a>
+		</li>
+		<li class="delete-template" data-confirm="{{{LANG_TEMPLATE_DELETE_CONFIRM}}}">
+			{{{LANG_TEMPLATE_DELETE}}}
+		</li>
+	</ul>
+	{{/templates_actions_contextmenu}}
+</template>

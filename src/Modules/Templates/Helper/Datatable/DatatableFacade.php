@@ -29,7 +29,6 @@ use App\Framework\Exceptions\ModuleException;
 use App\Framework\Utils\Datatable\DatatableFacadeInterface;
 use App\Framework\Utils\Datatable\Results\HeaderField;
 use App\Modules\Templates\Services\TemplatesDatatableService;
-use DateMalformedStringException;
 use Doctrine\DBAL\Exception;
 use Phpfastcache\Exceptions\PhpfastcacheSimpleCacheException;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -97,12 +96,13 @@ class DatatableFacade implements DatatableFacadeInterface
 	}
 
 	/**
+	 * @return array<string,mixed>
 	 * @throws CoreException
+	 * @throws Exception
 	 * @throws FrameworkException
 	 * @throws InvalidArgumentException
 	 * @throws ModuleException
 	 * @throws PhpfastcacheSimpleCacheException
-	 * @throws DateMalformedStringException
 	 */
 	public function prepareUITemplate(): array
 	{
@@ -129,14 +129,13 @@ class DatatableFacade implements DatatableFacadeInterface
 
 
 	/**
-	 *
 	 * @param list<HeaderField> $fields
 	 * @return list<array<string,mixed>>
 	 * @throws CoreException
+	 * @throws Exception
 	 * @throws FrameworkException
 	 * @throws InvalidArgumentException
-	 * @throws PhpfastcacheSimpleCacheException ´
-	 * @throws DateMalformedStringException
+	 * @throws PhpfastcacheSimpleCacheException
 	 */
 	private function prepareList(array $fields): array
 	{
@@ -150,4 +149,15 @@ class DatatableFacade implements DatatableFacadeInterface
 		return $this->datatablePreparer->prepareTableBody($currentResults, $fields, $this->UID);
 	}
 
+	/**
+	 * @return array<string,string>
+	 * @throws CoreException
+	 * @throws FrameworkException
+	 * @throws InvalidArgumentException
+	 * @throws PhpfastcacheSimpleCacheException
+	 */
+	public function prepareContextMenu(): array
+	{
+		return $this->datatablePreparer->formatContextMenu();
+	}
 }
