@@ -19,6 +19,7 @@
 
 import {BaseService}        from "../core/Base/BaseService.js";
 import {TemplatesApiConfig} from "./TemplatesApiConfig.js";
+import {PlayerApiConfig}    from "../player/PlayerApiConfig.js";
 
 export class TemplatesService extends BaseService
 {
@@ -51,6 +52,11 @@ export class TemplatesService extends BaseService
 		return await this._sendRequest(url, "GET");
 	}
 
+	determineRights(templateId)
+	{
+		const url = TemplatesApiConfig.ACLS_URI + "/" + templateId;
+		return this._sendRequestAsync(url, "GET");
+	}
 
 	async saveTemplateContent(templateId, content, image)
 	{

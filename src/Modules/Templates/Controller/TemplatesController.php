@@ -28,6 +28,7 @@ use App\Framework\Core\CsrfToken;
 use App\Framework\Exceptions\CoreException;
 use App\Framework\Exceptions\FrameworkException;
 use App\Framework\Exceptions\ModuleException;
+use App\Modules\Player\Enums\PlayerStatus;
 use App\Modules\Templates\Helper\Composer\Orchestrator;
 use App\Modules\Templates\Helper\Datatable\Parameters;
 use App\Modules\Templates\Services\TemplatesDatatableService;
@@ -67,6 +68,30 @@ readonly class TemplatesController
 		return $this->responseHandler->jsonSuccess($response);
 	}
 
+	/**
+	 * @param array<string,string> $args
+	 * @throws Exception
+	 */
+	public function determineRights(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+	{
+		$templateId = (int) ($args['template_id'] ?? 0);
+		$responseData = ['can_edit' => false, 'can_delete' => false];
+		if ($templateId === 0)
+			return $this->responseHandler->jsonSuccess($response, $responseData);
+
+		$inUse = $this->templatesDatatableService->getTemplatesInUse([$templateId]);
+		if ($inUse === [])
+			return $this->responseHandler->jsonSuccess($response, $responseData);
+
+		$responseData['can_edit']      = true;
+		$responseData['template_id']   = $templateId;
+
+		if ((int) $inUse[$templateId] === 0)
+			$responseData['can_delete'] = true;
+
+		return $this->responseHandler->jsonSuccess($response, $responseData);
+	}
+
 	public function load(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
 	{
 		$templateId = (int) ($args['template_id'] ?? 0);
@@ -79,6 +104,13 @@ readonly class TemplatesController
 	}
 
 	// find all templates for the User has access to
+
+	/**
+	 * @throws ModuleException
+	 * @throws CoreException
+	 * @throws PhpfastcacheSimpleCacheException
+	 * @throws Exception
+	 */
 	public function find(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
 	{
 		$params = $request->getQueryParams();

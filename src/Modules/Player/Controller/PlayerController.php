@@ -51,7 +51,6 @@ class PlayerController
 
 	/**
 	 * @param array<string,string> $args
-	 * @return ResponseInterface
 	 * @throws CoreException
 	 * @throws Exception
 	 * @throws FrameworkException
@@ -102,8 +101,16 @@ class PlayerController
 		return $this->responseHandler->jsonSuccess($response, $this->playerData);
 	}
 
+	/**
+	 * @throws CoreException
+	 * @throws UserException
+	 * @throws PhpfastcacheSimpleCacheException
+	 * @throws FrameworkException
+	 * @throws Exception
+	 */
 	public function delete(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
 	{
+		/** @var array<string,string> $requestData */
 		$requestData = $request->getParsedBody();
 
 		if (!$this->csrfToken->validateToken($requestData['csrf_token'] ?? ''))

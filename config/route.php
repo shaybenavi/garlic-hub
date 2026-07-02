@@ -194,6 +194,7 @@ $app->group('/async', function (RouteCollectorProxy $group) use ($container)
 
 	$group->delete('/templates', resolve([TemplatesController::class, 'delete'], $container));
 	$group->get('/templates/{template_id:\d+}', resolve([TemplatesController::class, 'load'], $container));
+	$group->get('/templates/acls/{template_id:\d+}', resolve([TemplatesController::class, 'determineRights'], $container));
 	$group->get('/templates/find', resolve([TemplatesController::class, 'find'], $container));
 	$group->patch('/templates', resolve([TemplatesController::class, 'save'], $container));
 

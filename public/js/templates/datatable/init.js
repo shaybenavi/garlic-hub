@@ -17,12 +17,30 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 "use strict";
-import {TemplatesActions} from "./TemplatesActions.js";
+
 import {TemplatesService}  from "../TemplatesService.js";
 import {FetchClient}       from "../../core/FetchClient.js";
+import {TemplatesActionsContextMenuFactory} from "./TemplatesActionsContextMenuFactory.js";
+import {FlashMessageHandler} from "../../core/FlashMessageHandler.js";
 
 document.addEventListener("DOMContentLoaded", function()
 {
-	const templatesActions = new TemplatesActions(new TemplatesService(new FetchClient()));
-	templatesActions.init()
+	const templatesService                   = new TemplatesService(new FetchClient());
+	const templatesActionsContextMenuFactory = new TemplatesActionsContextMenuFactory(
+		new FlashMessageHandler(),
+		templatesService
+	);
+
+	const contextMenus = document.getElementsByClassName("template-contextmenu");
+
+	for (let i = 0; i < contextMenus.length; i++)
+	{
+		contextMenus[i].addEventListener('click', async (event) =>
+		{
+			event.preventDefault();
+			const contextMenu = templatesActionsContextMenuFactory.create();
+			await contextMenu.init(event);
+		});
+	}
+
 });

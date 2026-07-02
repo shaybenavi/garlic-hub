@@ -38,7 +38,6 @@ export class PlayerService extends BaseService
 		return this._sendRequestAsync(url, "GET");
 	}
 
-
 	pushPlaylist(playerId)
 	{
 		const url = PlayerApiConfig.PUSH_URI;

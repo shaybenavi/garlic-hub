@@ -22,25 +22,37 @@ declare(strict_types=1);
 
 namespace App\Modules\Templates\Services;
 
+use App\Framework\Exceptions\CoreException;
+use App\Framework\Exceptions\UserException;
 use App\Framework\Services\AbstractDatatableService;
 use App\Framework\Utils\FormParameters\BaseParameters;
 use App\Modules\Auth\UserSession;
 use App\Modules\Templates\Repositories\TemplatesRepository;
+use Doctrine\DBAL\Exception;
+use Phpfastcache\Exceptions\PhpfastcacheSimpleCacheException;
 use Psr\Log\LoggerInterface;
 
 class TemplatesDatatableService extends AbstractDatatableService
 {
-	public function __construct(private readonly TemplatesRepository $templatesRepository,
-								private readonly BaseParameters $parameters,
-								private readonly UserSession $userSession,
+	/**
+	 * @throws UserException
+	 */
+	public function __construct(private readonly TemplatesRepository   $templatesRepository,
+								private readonly BaseParameters        $parameters,
+								private readonly UserSession           $userSession,
 								private readonly TemplatesUsageService $templatesUsageService,
-								private readonly AclValidator $aclValidator,
-								LoggerInterface $logger)
+								private readonly AclValidator          $aclValidator,
+								LoggerInterface                        $logger)
 	{
 		$this->setUID($this->userSession->getUID());
 		parent::__construct($logger);
 	}
 
+	/**
+	 * @throws PhpfastcacheSimpleCacheException
+	 * @throws CoreException
+	 * @throws Exception
+	 */
 	public function checkDisplayRights(): bool
 	{
 		if ($this->aclValidator->isSimpleAdmin($this->UID))
@@ -50,6 +62,11 @@ class TemplatesDatatableService extends AbstractDatatableService
 	}
 
 
+	/**
+	 * @throws CoreException
+	 * @throws PhpfastcacheSimpleCacheException
+	 * @throws Exception
+	 */
 	public function loadDatatable(): void
 	{
 		if ($this->aclValidator->isModuleAdmin($this->UID))
@@ -74,7 +91,12 @@ class TemplatesDatatableService extends AbstractDatatableService
 		}
 	}
 
-	public function getTemplatesInUse(array $templateIds)
+	/**
+	 * @param int[] $templateIds
+	 * @return array<int,bool>
+	 * @throws Exception
+	 */
+	public function getTemplatesInUse(array $templateIds): array
 	{
 		if ($templateIds === [])
 			return [];
