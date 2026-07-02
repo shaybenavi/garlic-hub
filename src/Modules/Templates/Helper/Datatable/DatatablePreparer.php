@@ -27,7 +27,7 @@ use App\Framework\Utils\Datatable\AbstractDatatablePreparer;
 use App\Framework\Utils\Datatable\PrepareService;
 use App\Framework\Utils\Datatable\Results\HeaderField;
 use App\Modules\Templates\Services\AclValidator;
-use DateMalformedStringException;
+use Doctrine\DBAL\Exception;
 use Phpfastcache\Exceptions\PhpfastcacheSimpleCacheException;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -68,7 +68,7 @@ class DatatablePreparer extends AbstractDatatablePreparer
 	 * @throws FrameworkException
 	 * @throws InvalidArgumentException
 	 * @throws PhpfastcacheSimpleCacheException
-	 * @throws DateMalformedStringException
+	 * @throws Exception
 	 */
 	public function prepareTableBody(array $currentFilterResults, array $fields, int $currentUID): array
 	{
@@ -114,7 +114,7 @@ class DatatablePreparer extends AbstractDatatablePreparer
 				$list['elements_result_element'][] = $resultElements;
 				if ($template['UID'] == $currentUID || $this->aclValidator->isTemplateEditable($currentUID, $template))
 				{
-					$list['has_action'] = [
+					$list['has_action_link'] = [
 						$this->prepareService->getBodyPreparer()->formatActionLink(
 							$this->translator->translate('composer', 'templates'),
 							'templates/composer/'.$template['template_id'],
