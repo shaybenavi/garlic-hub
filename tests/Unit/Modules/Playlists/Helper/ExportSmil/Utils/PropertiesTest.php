@@ -59,7 +59,7 @@ class PropertiesTest extends TestCase
 
 		static::assertSame('fit="meetBest" ', $properties->getFit());
 		static::assertSame('mediaAlign="center" ', $properties->getMediaAlign());
-		static::assertSame('soundLevel="100" ', $properties->getVolume());
+		static::assertSame('soundLevel="100%" ', $properties->getVolume());
 	}
 
 	/**
@@ -72,7 +72,7 @@ class PropertiesTest extends TestCase
 
 		static::assertSame('fit="slice" ', $properties->getFit());
 		static::assertSame('mediaAlign="midRight" ', $properties->getMediaAlign());
-		static::assertSame('soundLevel="56" ', $properties->getVolume());
+		static::assertSame('soundLevel="56%" ', $properties->getVolume());
 	}
 
 	/**
@@ -88,7 +88,7 @@ class PropertiesTest extends TestCase
 
 		static::assertEmpty($properties->getFit());
 		static::assertEmpty($properties->getMediaAlign());
-		static::assertSame('soundLevel="100" ', $properties->getVolume());
+		static::assertSame('soundLevel="100%" ', $properties->getVolume());
 	}
 
 }
