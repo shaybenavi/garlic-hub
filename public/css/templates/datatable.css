@@ -5,12 +5,10 @@
     text-overflow: ellipsis;
 }
 .results-listing .name {width:45%;}
-.results-listing .results-body .player_name {display:flex;justify-content:flex-end;gap:0.25rem;flex-direction: row-reverse;}
-.results-listing .player_name .player-contextmenu{border:0; background-color:transparent;line-height:0; cursor: pointer;}
 .results-listing .UID {width:15%;}
 .results-listing .type {width:10%;}
 .results-listing .used {width:15%;}
 .results-listing .results-body .playlist_id {text-align: right;}
 .results-listing .actions {width:5%;min-width:7rem;}
 
-#playlist_name_search {width:200rem;}
+.context-menu .delete-template{border-top: 1px solid #e0e0e0;margin-top: 4px;padding-top: 8px;color: #d32f2f;}
