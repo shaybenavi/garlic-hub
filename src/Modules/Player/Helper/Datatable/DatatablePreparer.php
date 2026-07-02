@@ -85,12 +85,11 @@ class DatatablePreparer extends AbstractDatatablePreparer
 							new DateTime('now'), new DateTime($player['last_access'])
 						)->getLastAccessTimeStamp();
 
-						if ($lastAccessSince < (2 * $player['refresh']))
-							$class = 'player-active';
-						else if ($lastAccessSince < (4 * $player['refresh']))
-							$class = 'player-pending';
-						else
-							$class = 'player-inactive';
+						$class = match (true) {
+							$lastAccessSince < (2 * $player['refresh']) => 'player-active',
+							$lastAccessSince < (4 * $player['refresh']) => 'player-pending',
+							default => 'player-inactive'
+						};
 
 						$resultElements['is_span'] = $this->prepareService->getBodyPreparer()->formatSpan(
 							$this->timeUnitsCalculator->printDistance(),
@@ -104,12 +103,12 @@ class DatatablePreparer extends AbstractDatatablePreparer
 						break;
 					case 'status':
 						$title = $this->translator->translateArrayForOptions('status_selects', 'player')[$player['status']];
-						if ($player['status'] == PlayerStatus::RELEASED->value)
-							$iconClass = 'bi bi-check';
-						else if ($player['status'] == PlayerStatus::UNRELEASED->value)
-							$iconClass = 'bi bi-x';
-						else
-							$iconClass = 'bi bi-bug';
+						$iconClass = match ($player['status'])
+						{
+							PlayerStatus::RELEASED->value => 'bi bi-check',
+							PlayerStatus::UNRELEASED->value => 'bi bi-x',
+							default => 'bi bi-bug',
+						};
 
 						$resultElements['is_icon'] = $this->prepareService->getBodyPreparer()->formatIcon($iconClass, $title);
 
@@ -151,8 +150,8 @@ class DatatablePreparer extends AbstractDatatablePreparer
 
 		return $body;
 
-/*		$data['LANG_SELECT_ALL', 	$this->translator->translate('select_all', 'main'));
-		$data['LANG_DESELECT_ALL', 	$this->translator->translate('deselect_all', 'main'));
+/*		$data['LANG_SELECT_ALL', $this->translator->translate('select_all', 'main'));
+		$data['LANG_DESELECT_ALL',	$this->translator->translate('deselect_all', 'main'));
 		foreach ($this->translator->getTranslationsArrayForOptions('action_selects', 'playlists') as $key => $action)
 		{
 			$data['select_action' ] = [
