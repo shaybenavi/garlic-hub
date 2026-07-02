@@ -46,7 +46,7 @@ export class PlayerActionsContextMenuView
 	{
 		const menuWidth = this.#menu.offsetWidth;
 		this.#menu.style.left = `${x - menuWidth}px`;
-		this.#menu.style.top = `${y}px`;
+		this.#menu.style.top = `${y + window.scrollY}px`;
 	}
 
 	setGotoLink(playlistId)
