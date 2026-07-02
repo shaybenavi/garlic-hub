@@ -68,7 +68,7 @@ class Properties
 
 	public function getVolume(): string
 	{
-		return 'soundLevel="'.$this->volume.'" ';
+		return 'soundLevel="'.$this->volume.'%" ';
 	}
 
 }
