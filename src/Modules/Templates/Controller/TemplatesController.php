@@ -80,13 +80,10 @@ readonly class TemplatesController
 			return $this->responseHandler->jsonSuccess($response, $responseData);
 
 		$inUse = $this->templatesDatatableService->getTemplatesInUse([$templateId]);
-		if ($inUse === [])
-			return $this->responseHandler->jsonSuccess($response, $responseData);
-
 		$responseData['can_edit']      = true;
 		$responseData['template_id']   = $templateId;
 
-		if ((int) $inUse[$templateId] === 0)
+		if ( $inUse === [])
 			$responseData['can_delete'] = true;
 
 		return $this->responseHandler->jsonSuccess($response, $responseData);

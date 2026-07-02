@@ -52,7 +52,6 @@ export class TemplatesActionsContextMenu
 			this.#deleteEventListener();
 
 		document.body.appendChild(this.#contextMenuView.menu);
-
 		this.#contextMenuView.placeMenu(event.clientX, event.clientY)
 
 		document.addEventListener('click', () => {
