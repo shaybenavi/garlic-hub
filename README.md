@@ -42,7 +42,7 @@ The environment is regularly deleted and rebuilt.
 | **Core Framework**           | ✅      | Database, migrations, logging, routing, middleware and error handling with SLIM 4                                                      |
 | **Initial admin user**       | ✅      | Set initial admin user after installation                                                                                              |
 | **User management**          | ✅      | Basic user management                                                                                            |
-| **Template Editor (images)** | 🚧       | Template Editor for Images based on fabric.js                                                                                                                  |
+| **Template Editor (images)** | ✅       | Template Editor for Images based on fabric.js                                                                                                                  |
 | **Authentication**           | ✅      | Session-based login with remember-me functionality and basic OAuth2 token authorization                                                |
 | **Media Management**         | ✅      | Hierarchical content organization with multi-source uploads (local, external links, screencasts, camera, stock platforms with API-key) |
 | **SMIL Playlists**           | ✅      | Playlist management and export in industry-standard SMIL format                                                                        |
