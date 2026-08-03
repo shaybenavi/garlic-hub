@@ -193,7 +193,7 @@ class ShowPasswordControllerTest extends TestCase
 			->willReturn(['token' => $passwordToken]);
 
 		$this->facadeMock->expects($this->once())->method('determineUIDByToken')
-			->with(hex2bin($passwordToken))
+			->with($passwordToken)
 			->willReturn(123);
 
 		$dataSections = ['key' => 'value'];

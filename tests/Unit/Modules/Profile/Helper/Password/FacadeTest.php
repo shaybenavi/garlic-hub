@@ -41,6 +41,7 @@ use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\InvalidArgumentException;
+use Random\RandomException;
 
 class FacadeTest extends TestCase
 {
@@ -77,16 +78,32 @@ class FacadeTest extends TestCase
 
 	/**
 	 * @throws DateMalformedStringException
-	 * @throws \Doctrine\DBAL\Exception
+	 * @throws \Doctrine\DBAL\Exception|RandomException
+	 */
+	#[Group('units')]
+	public function testDetermineUIDByTokenReturnsZero(): void
+	{
+		$passwordToken = 'wrong token';
+		$this->usersTokenServiceMock->expects($this->never())
+			->method('findByToken');
+
+		$result = $this->facade->determineUIDByToken($passwordToken);
+
+		self::assertSame(0, $result);
+	}
+
+
+	/**
+	 * @throws DateMalformedStringException
+	 * @throws \Doctrine\DBAL\Exception|RandomException
 	 */
 	#[Group('units')]
 	public function testDetermineUIDByTokenReturnsZeroIfTokenNotFound(): void
 	{
-		$passwordToken = 'nonexistent_token';
-
+		$passwordToken = bin2hex(random_bytes(32));
 		$this->usersTokenServiceMock->expects($this->once())
 			->method('findByToken')
-			->with($passwordToken)
+			->with(hex2bin($passwordToken))
 			->willReturn(null);
 
 		$result = $this->facade->determineUIDByToken($passwordToken);
@@ -97,11 +114,12 @@ class FacadeTest extends TestCase
 	/**
 	 * @throws DateMalformedStringException
 	 * @throws \Doctrine\DBAL\Exception
+	 * @throws RandomException
 	 */
 	#[Group('units')]
 	public function testDetermineUIDByTokenReturnsUIDForValidToken(): void
 	{
-		$passwordToken = 'valid_token';
+		$passwordToken = bin2hex(random_bytes(32));
 		$userData = [
 			'UID' => 123,
 			'company_id' => 1,
@@ -111,7 +129,7 @@ class FacadeTest extends TestCase
 		];
 
 		$this->usersTokenServiceMock->expects($this->once())->method('findByToken')
-			->with($passwordToken)
+			->with(hex2bin($passwordToken))
 			->willReturn($userData);
 
 		$this->profileServiceMock->expects($this->once())->method('setUID')->with($userData['UID']);
@@ -124,11 +142,12 @@ class FacadeTest extends TestCase
 	/**
 	 * @throws DateMalformedStringException
 	 * @throws \Doctrine\DBAL\Exception
+	 * @throws RandomException
 	 */
 	#[Group('units')]
 	public function testDetermineUIDByTokenInValidToken(): void
 	{
-		$passwordToken = 'valid_token';
+		$passwordToken = bin2hex(random_bytes(32));
 		$userData = [
 			'UID' => 123,
 			'company_id' => 1,
@@ -138,7 +157,7 @@ class FacadeTest extends TestCase
 		];
 
 		$this->usersTokenServiceMock->expects($this->once())->method('findByToken')
-			->with($passwordToken)
+			->with(hex2bin($passwordToken))
 			->willReturn($userData);
 
 		$this->profileServiceMock->expects($this->never())->method('setUID');
@@ -315,17 +334,18 @@ class FacadeTest extends TestCase
 	}
 
 	/**
-	 * @throws \Doctrine\DBAL\Exception
-	 * @throws PhpfastcacheSimpleCacheException
-	 * @throws InvalidArgumentException
-	 * @throws FrameworkException
 	 * @throws CoreException
 	 * @throws DateMalformedStringException
+	 * @throws FrameworkException
+	 * @throws InvalidArgumentException
+	 * @throws PhpfastcacheSimpleCacheException
+	 * @throws RandomException
+	 * @throws \Doctrine\DBAL\Exception
 	 */
 	#[Group('units')]
 	public function testPrepareUITemplateWithToken(): void
 	{
-		$passwordToken = 'valid_token';
+		$passwordToken = bin2hex(random_bytes(32));
 		$userData = [
 			'UID' => 123,
 			'company_id' => 1,
@@ -335,7 +355,6 @@ class FacadeTest extends TestCase
 		];
 
 		$this->usersTokenServiceMock->expects($this->once())->method('findByToken')
-			->with($passwordToken)
 			->willReturn($userData);
 
 		$this->profileServiceMock->expects($this->once())->method('setUID')->with($userData['UID']);
@@ -381,17 +400,18 @@ class FacadeTest extends TestCase
 
 
 	/**
-	 * @throws DateMalformedStringException
 	 * @throws CoreException
-	 * @throws PhpfastcacheSimpleCacheException
-	 * @throws InvalidArgumentException
+	 * @throws DateMalformedStringException
 	 * @throws FrameworkException
+	 * @throws InvalidArgumentException
+	 * @throws PhpfastcacheSimpleCacheException
+	 * @throws RandomException
 	 * @throws \Doctrine\DBAL\Exception
 	 */
 	#[Group('units')]
 	public function testPrepareUITemplateWithInitialToken(): void
 	{
-		$passwordToken = 'valid_token';
+		$passwordToken = bin2hex(random_bytes(32));
 		$userData = [
 			'UID' => 123,
 			'company_id' => 1,
@@ -401,7 +421,6 @@ class FacadeTest extends TestCase
 		];
 
 		$this->usersTokenServiceMock->expects($this->once())->method('findByToken')
-			->with($passwordToken)
 			->willReturn($userData);
 
 		$this->profileServiceMock->expects($this->once())->method('setUID')->with($userData['UID']);
@@ -448,12 +467,13 @@ class FacadeTest extends TestCase
 	/**
 	 * @throws ModuleException
 	 * @throws \Doctrine\DBAL\Exception
+	 * @throws RandomException
 	 */
 	#[Group('units')]
 	public function testStoreForcedPasswordThrowsException(): void
 	{
 		$UID = 1234;
-		$passwordToken = 'dummy_token';
+		$passwordToken = bin2hex(random_bytes(32));
 
 		$this->settingsParametersMock->expects($this->once())->method('getValueOfParameter')
 			->with(Parameters::PARAMETER_PASSWORD)
@@ -461,7 +481,7 @@ class FacadeTest extends TestCase
 
 		$this->profileServiceMock->expects($this->once())
 			->method('storeNewForcedPassword')
-			->with($UID, $passwordToken, 'valid_password')
+			->with($UID, hex2bin($passwordToken), 'valid_password')
 			->willReturn(1)
 		;
 
