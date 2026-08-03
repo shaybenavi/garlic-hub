@@ -90,8 +90,7 @@ class ShowPasswordController
 			return $response->withHeader('Location', '/login')->withStatus(302);
 		}
 
-		$binToken = hex2bin($passwordToken);
-		$UID = $this->facade->determineUIDByToken($binToken);
+		$UID = $this->facade->determineUIDByToken($passwordToken);
 		if ($UID === 0)
 		{
 			$this->flash->addMessage('error', $this->translator->translate('token_error', 'profile'));
@@ -126,7 +125,8 @@ class ShowPasswordController
 			$this->flash->addMessageNow('error', $this->translator->translate('no_token', 'profile'));
 			return $response->withHeader('Location', '/login')->withStatus(302);
 		}
-		$UID = $this->facade->determineUIDByToken($passwordToken);
+
+		$UID      = $this->facade->determineUIDByToken($passwordToken);
 		if ($UID === 0)
 		{
 			$this->flash->addMessageNow('error', $this->translator->translate('token_error', 'profile'));

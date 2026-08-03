@@ -66,7 +66,11 @@ class Facade
 	 */
 	public function determineUIDByToken(string $passwordToken): int
 	{
-		$user = $this->userTokensService->findByToken($passwordToken);
+		$binToken = hex2bin($passwordToken);
+		if ($binToken === false)
+			return 0;
+
+		$user = $this->userTokensService->findByToken($binToken);
 		if ($user === null)
 			return 0;
 
@@ -172,7 +176,11 @@ class Facade
 	{
 		$password = $this->passwordParameters->getValueOfParameter(Parameters::PARAMETER_PASSWORD);
 
-		return $this->profileService->storeNewForcedPassword($UID, $passwordToken, $password);
+		$binToken = hex2bin($passwordToken);
+		if ($binToken === false)
+			return 0;
+
+		return $this->profileService->storeNewForcedPassword($UID, $binToken, $password);
 	}
 
 	/**
