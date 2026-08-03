@@ -83,7 +83,7 @@ class FacadeTest extends TestCase
 	#[Group('units')]
 	public function testDetermineUIDByTokenReturnsZero(): void
 	{
-		$passwordToken = 'wrong token';
+		$passwordToken = 'zz11';
 		$this->usersTokenServiceMock->expects($this->never())
 			->method('findByToken');
 

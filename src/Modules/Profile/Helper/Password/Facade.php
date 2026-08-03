@@ -66,11 +66,12 @@ class Facade
 	 */
 	public function determineUIDByToken(string $passwordToken): int
 	{
-		$binToken = hex2bin($passwordToken);
-		if ($binToken === false)
+		if (!ctype_xdigit($passwordToken) || strlen($passwordToken) % 2 !== 0)
 			return 0;
 
-		$user = $this->userTokensService->findByToken($binToken);
+		$binToken = hex2bin($passwordToken);
+
+		$user = $this->userTokensService->findByToken($binToken); // @phpstan-ignore-line
 		if ($user === null)
 			return 0;
 
