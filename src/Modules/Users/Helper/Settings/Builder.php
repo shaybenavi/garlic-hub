@@ -25,6 +25,7 @@ use App\Framework\Core\Session;
 use App\Framework\Exceptions\CoreException;
 use App\Framework\Exceptions\FrameworkException;
 use App\Framework\Exceptions\ModuleException;
+use App\Modules\Profile\Entities\TokenPurposes;
 use App\Modules\Users\Services\AclValidator;
 use Doctrine\DBAL\Exception;
 use Phpfastcache\Exceptions\PhpfastcacheSimpleCacheException;
@@ -127,6 +128,9 @@ class Builder
 		$tokens = $user['tokens'] ?? [];
 		foreach ($tokens as $token)
 		{
+			if ($token['purpose'] === TokenPurposes::AUTOLOGIN->value)
+				continue;
+
 			$value = '';
 			if ($session->exists($token['purpose'].'_token'))
 			{
