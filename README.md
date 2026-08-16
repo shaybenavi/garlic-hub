@@ -86,6 +86,9 @@ documents which properties garlic-hub protects, which behaviours are deliberate
 design decisions arising from the constraints of unattended signage hardware,
 and what is in and out of scope.
 
+A CycloneDX SBOM is generated for each release and attached to the
+[release assets](https://github.com/garlic-signage/garlic-hub/releases).
+
 ## Contributing
 PRs and issues are welcome. The project is in active development. Code and APIs may still change.
 
