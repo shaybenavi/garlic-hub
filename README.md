@@ -74,12 +74,22 @@ The environment is regularly deleted and rebuilt.
 - [Api/Oauth2 - API and Oauth2](docs/oauth2.md)
 - [User- Administration](docs/user-administration.md)
 - [Connect Media Player](docs/connect-media-player.md)
+- [Threat Model](docs/threat-model.md)
 - [Architecture](ARCHITECTURE.md)
 
-# Contributing
+## Security
+
+Vulnerability reports: see [SECURITY.md](SECURITY.md).
+
+Before reporting, please read the [Threat Model](docs/threat-model.md). It
+documents which properties garlic-hub protects, which behaviours are deliberate
+design decisions arising from the constraints of unattended signage hardware,
+and what is in and out of scope.
+
+## Contributing
 PRs and issues are welcome. The project is in active development. Code and APIs may still change.
 
-# License
+## License
 [Affero GPL v3.0 License](https://www.gnu.org/licenses/agpl-3.0.en.html).
 
 Note: AGPL requires that modifications — including server-side deployments —
