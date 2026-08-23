@@ -18,7 +18,7 @@
 */
 export class LabeledZone extends fabric.Group
 {
-	static _transparent = "rgba(128, 128, 128, 0.3)";
+	static _transparent = "transparent";
 	static _fontFamilyRegular = "OpenSans-Regular"
 	static _fontFamilyBold = "OpenSans-Bold"
 	static _font_size_label = 32;
