@@ -17,6 +17,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 import {Utils} from "../../core/Utils.js";
+import { PushHandler } from "./ActionHandler/PushHandler.js";
 
 export class PlayerActionsContextMenu
 {
@@ -28,13 +29,14 @@ export class PlayerActionsContextMenu
 	#contextMenuView = null;
 	#controller = null;
 	#currentPlayerId = 0;
+	#waitOverlay = null;
 
-	constructor(contextMenuView, flashMessageHandler, autoCompleteFactory, pushhandler, playerService)
+	constructor(contextMenuView, flashMessageHandler, autoCompleteFactory, waitOverlay, playerService)
 	{
 		this.#contextMenuView       = contextMenuView;
 		this.#flashMessageHandler   = flashMessageHandler;
 		this.#autoCompleteFactory   = autoCompleteFactory;
-		this.#pushHandler           = pushhandler;
+		this.#waitOverlay           = waitOverlay;
 		this.#playerService         = playerService;
 		this.#controller            = new AbortController();
 	}
@@ -46,6 +48,8 @@ export class PlayerActionsContextMenu
 
 		if (!responseData.can_edit)
 			return;
+
+		this.#pushHandler = new PushHandler(this.#flashMessageHandler, this.#playerService, this.#waitOverlay, this.#currentPlayerId); 
 
 		this.#contextMenuView.initMenuItems();
 
