@@ -23,12 +23,14 @@ export class PushHandler
 	#playerService = null;
 	#messageHandler = null;
 	#waitOverlay = null;
+	#playerId = null;
 
-	constructor(messageHandler, PlayerService, waitOverlay)
+	constructor(messageHandler, PlayerService, waitOverlay, playerId)
 	{
 		this.#messageHandler = messageHandler;
 		this.#playerService = PlayerService;
 		this.#waitOverlay = waitOverlay;
+		this.#playerId = playerId;
 	}
 
 	addPushPlaylistListener(pushPlaylist)
@@ -37,8 +39,7 @@ export class PushHandler
 		{
 			try
 			{
-				const currentId = event.target.dataset.actionId;
-				this.#playerService.pushPlaylist(currentId)
+				this.#playerService.pushPlaylist(this.#playerId)
 				.then(result => {
 					this.#waitOverlay.stop();
 					this.#messageHandler.clearAllMessages();

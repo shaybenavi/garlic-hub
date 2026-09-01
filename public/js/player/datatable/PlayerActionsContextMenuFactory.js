@@ -19,7 +19,6 @@
 'use strict';
 import {PlayerActionsContextMenu} from "./PlayerActionsContextMenu.js";
 import {PlayerActionsContextMenuView} from "./PlayerActionsContextMenuView.js";
-import {PushHandler}     from "./ActionHandler/PushHandler.js";
 import {WaitOverlay}     from "../../core/WaitOverlay.js";
 
 export class PlayerActionsContextMenuFactory
@@ -41,7 +40,7 @@ export class PlayerActionsContextMenuFactory
 			new PlayerActionsContextMenuView(),
 			this.#flashMessageHandler,
 			this.#autocompleteFactory,
-			new PushHandler(this.#flashMessageHandler, this.#playerService, new WaitOverlay()),
+			new WaitOverlay(),
 			this.#playerService
 		);
 	}
