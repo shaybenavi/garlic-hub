@@ -157,8 +157,6 @@ class Orchestrator
 		$this->player = $player;
 	}
 
-
-
 	/**
 	 * @throws UserException
 	 */
