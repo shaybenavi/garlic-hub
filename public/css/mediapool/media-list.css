@@ -106,8 +106,14 @@
     display: block;
 }
 
-    .media-list-list-view .media-item:nth-child(even) {background-color: #fff;}
-    .media-list-list-view .media-item:nth-child(odd) {background-color: #f8f9fa; }
+    .media-list-list-view .media-item:nth-child(even) {
+        background-color: var(--gh-surface-color);
+    }
+    
+    .media-list-list-view .media-item:nth-child(odd) {
+        background-color: oklch(from var(--gh-surface-color) calc(l - 0.03) c h);
+    }
+    
     .media-list-list-view .media-item:hover {background-color: var(--gh-primary-bgcolor); }
     .media-list-list-view .media-type-icon {display: none;}
     .media-list-list-view .media-item
