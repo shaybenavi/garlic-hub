@@ -202,6 +202,9 @@ export class DragDropHandler
 	/**
 	 * Insert the given source ids into the playlist (default: append at end).
 	 * Same path as a multi-item drag-and-drop, for the "Add to playlist" button.
+	 *
+	 * Positions are 1-based. The insert API rejects position 0 via PHP empty(),
+	 * and createPlaylistItem treats position > children.length as append.
 	 */
 	async insertIds(ids, position = null)
 	{
@@ -210,37 +213,61 @@ export class DragDropHandler
 
 		let droppedIndex = position;
 		if (droppedIndex === null || droppedIndex === undefined)
-			droppedIndex = this.#dropTarget.children.length;
+			droppedIndex = this.#dropTarget.children.length + 1;
+		else if (droppedIndex < 1)
+			droppedIndex = 1;
 
 		let result = null;
 		let inserted = 0;
+		let lastError = "";
 		for (const id of ids)
 		{
 			const at = droppedIndex + inserted;
-			switch (this.#source)
+			try
 			{
-				case "mediapool":
-					result = await this.#itemService.insertMedia(id, this.#playlistId, at);
-					break;
-				case "playlists":
-					result = await this.#itemService.insertPlaylist(id, this.#playlistId, at);
-					break;
-				case "templates":
-					result = await this.#itemService.insertTemplate(id, this.#playlistId, at);
-					break;
-				default:
-					throw new Error("Unknown source");
+				switch (this.#source)
+				{
+					case "mediapool":
+						result = await this.#itemService.insertMedia(id, this.#playlistId, at);
+						break;
+					case "playlists":
+						result = await this.#itemService.insertPlaylist(id, this.#playlistId, at);
+						break;
+					case "templates":
+						result = await this.#itemService.insertTemplate(id, this.#playlistId, at);
+						break;
+					default:
+						throw new Error("Unknown source");
+				}
+			}
+			catch (err)
+			{
+				lastError = err?.message ?? String(err);
+				continue;
+			}
+
+			if (result && result.success === false)
+			{
+				lastError = result.error_message || "Insert failed";
+				continue;
 			}
 
 			if (!result?.data?.item)
+			{
+				lastError = lastError || "Insert returned no item";
 				continue;
+			}
 
 			this.#itemList.createPlaylistItem(result.data.item, at);
 			inserted++;
 		}
 
 		if (inserted === 0)
-			return 0;
+		{
+			if (lastError)
+				console.error("Add to playlist failed:", lastError);
+			throw new Error(lastError || "Could not add selected media to the playlist");
+		}
 
 		this.#itemList.displayPlaylistMetrics(result.data.playlist_metrics);
 		PlaylistsProperties.notifySave();

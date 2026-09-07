@@ -103,6 +103,10 @@ export class InsertContextMenu
 				await this.#dragDropHandler.insertIds(ids);
 				selector.clearSelection();
 			}
+			catch (err)
+			{
+				alert(err?.message || "Could not add to playlist");
+			}
 			finally
 			{
 				syncButton({ count: selector.getSelectedIds().length });
