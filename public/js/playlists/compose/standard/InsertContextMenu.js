@@ -47,6 +47,7 @@ export class InsertContextMenu
 	async #insertMedia()
 	{
 		const selector = this.#selectorFactory.create("mediapool");
+		selector.enableMultiSelect(); // click several thumbnails, then drag any of them into the playlist
 		await selector.showSelector(this.#itemSelectContainer);
 		this.#dragDropHandler.source = "mediapool";
 		this.#dragDropHandler.items = selector.getMediaItems();

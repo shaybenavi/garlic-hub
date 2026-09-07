@@ -14,12 +14,18 @@
         flex-grow: 1;
         display:grid;
         grid-template-columns: repeat(auto-fill, 100px);
-        grid-template-rows: repeat(auto-fill, 100px);
+        /* Rows must be implicit. `grid-template-rows: repeat(auto-fill, 100px)` only
+           creates as many explicit rows as fit the container height, so once the list
+           is taller than the container every further item lands in the same tracks and
+           the thumbnails render stacked on top of each other. */
+        grid-auto-rows: 100px;
+        align-content: start;
         gap: 1em;
         padding: 1em;
         box-sizing: border-box;
         overflow-y: auto;
         max-height: 73.8vh;
+        user-select: none;
     }
             .media-item
             {
@@ -34,13 +40,57 @@
                 transition: transform 0.2s, box-shadow 0.2s;
             }
 
-            #mediaList .selected
+            /* Selection is drawn with an outline so it never changes the box size and
+               never shifts the grid. */
+            #mediaList .media-item.selected
             {
-                background-color: var(--gh-primary-color);
-                border: 12px solid #000;
-                border-radius: var(--gh-border-radius);
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                outline: 3px solid var(--gh-primary-color);
+                outline-offset: -3px;
+                border-color: var(--gh-primary-color);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
             }
+            #mediaList .media-item.selected figure img
+            {
+                opacity: 0.75;
+            }
+            #mediaList .media-item.selected::after
+            {
+                content: "\2713";
+                position: absolute;
+                z-index: 101;
+                bottom: 5px;
+                right: 5px;
+                width: 1.4em;
+                height: 1.4em;
+                line-height: 1.4em;
+                text-align: center;
+                font-weight: bold;
+                border-radius: 50%;
+                color: #fff;
+                background-color: var(--gh-primary-color);
+                pointer-events: none;
+            }
+
+            /* Dragging one of several selected items: show how many will be inserted. */
+            .gu-mirror.media-item[data-drag-count]::before
+            {
+                content: attr(data-drag-count);
+                position: absolute;
+                z-index: 102;
+                top: -0.6em;
+                right: -0.6em;
+                min-width: 1.8em;
+                height: 1.8em;
+                line-height: 1.8em;
+                padding: 0 0.4em;
+                text-align: center;
+                font-weight: bold;
+                border-radius: 1em;
+                color: #fff;
+                background-color: var(--gh-primary-color);
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+            }
+            .gu-mirror.media-item { overflow: visible; }
 
             .media-list-grid-view .media-item
             {

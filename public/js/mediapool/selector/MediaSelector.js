@@ -29,6 +29,7 @@ export class MediaSelector
 	#mediaService = {};
 	#selectorView = {};
 	#isMultiselect = false;
+	#selectionAnchor = null; // last plainly clicked item, start of a Shift+click range
 
 	constructor(treeViewWrapper, mediaService, selectorView)
 	{
@@ -84,22 +85,37 @@ export class MediaSelector
 		return this.#emitter.off(eventName, listener);
 	}
 
+	/**
+	 * Selected items in the order they appear in the grid.
+	 */
 	getSelectedMedia()
 	{
-		return [...document.querySelectorAll('.media-item.selected')].map(article => ({
+		return this.#selectedElements().map(article => ({
 			id: article.dataset.mediaId,
 			src: article.querySelector('img').src
 		}));
 	}
 
+	getSelectedIds()
+	{
+		return this.#selectedElements().map(article => article.dataset.selectId ?? article.dataset.mediaId);
+	}
+
+	clearSelection()
+	{
+		this.#selectedElements().forEach(el => el.classList.remove('selected'));
+		this.#selectionAnchor = null;
+	}
+
+	// kept for callers using the lowercase spelling
 	enableMultiselect()
 	{
-		this.#isMultiselect = true;
+		this.enableMultiSelect();
 	}
 
 	disableMultiselect()
 	{
-		this.#isMultiselect = false;
+		this.disableMultiSelect();
 	}
 
 
@@ -107,16 +123,60 @@ export class MediaSelector
 	{
 		element.replaceChildren(this.#selectorView.loadSelectorTemplate());
 		this.#treeViewWrapper.initTree();
+		this.#selectionAnchor = null;
 
-		document.getElementById('mediaList').addEventListener('click', (e) => {
-			const item = e.target.closest('.media-item');
-			if (!item)
-				return;
+		const mediaList = document.getElementById('mediaList');
+		mediaList.addEventListener('click', (e) => this.#onItemClick(e, mediaList));
+	}
 
-			if (!this.#isMultiselect)
-				document.querySelectorAll('.media-item.selected').forEach(el => el.classList.remove('selected'));
+	/**
+	 * Single-select mode: click toggles the one item.
+	 * Multi-select mode:  click toggles the item (checkbox behaviour, no modifier needed),
+	 *                     Shift+click selects the range from the last clicked item,
+	 *                     click on empty grid space clears the selection.
+	 */
+	#onItemClick(e, mediaList)
+	{
+		const item = e.target.closest('.media-item');
+
+		if (!item)
+		{
+			if (this.#isMultiselect && e.target === mediaList)
+				this.clearSelection();
+			return;
+		}
+
+		if (!this.#isMultiselect)
+		{
+			this.#selectedElements().forEach(el => { if (el !== item) el.classList.remove('selected'); });
 			item.classList.toggle('selected');
-		});
+			this.#selectionAnchor = item.classList.contains('selected') ? item : null;
+			return;
+		}
+
+		if (e.shiftKey && this.#selectionAnchor !== null && this.#selectionAnchor.isConnected)
+		{
+			const items = [...mediaList.querySelectorAll('.media-item')];
+			const from  = items.indexOf(this.#selectionAnchor);
+			const to    = items.indexOf(item);
+			const [start, end] = from < to ? [from, to] : [to, from];
+			for (let i = start; i <= end; i++)
+				items[i].classList.add('selected');
+			// anchor stays put so a second Shift+click extends from the same origin
+			return;
+		}
+
+		item.classList.toggle('selected');
+		this.#selectionAnchor = item;
+	}
+
+	#selectedElements()
+	{
+		const mediaList = this.#selectorView.getMediaListElement();
+		if (mediaList === null)
+			return [];
+
+		return [...mediaList.querySelectorAll('.media-item.selected')];
 	}
 
 	async loadMedia(nodeId)
@@ -127,6 +187,7 @@ export class MediaSelector
 	displayMediaList(mediaList)
 	{
 		this.#selectorView.displayMediaList(mediaList);
+		this.#selectionAnchor = null; // the grid was rebuilt, old anchor element is gone
 	}
 
 	#initEvents()

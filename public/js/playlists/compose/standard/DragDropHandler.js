@@ -85,7 +85,15 @@ export class DragDropHandler
 		this.#drake   = dragula(dropContainers, options)
 			.on('drag', (el, source) => {
 				if (source === this.#dropSource)
-					this.#dragItem = this.#items[el.getAttribute('select-data-id')];
+					this.#dragItem = this.#items[el.getAttribute('data-select-id')];
+			})
+			.on('cloned', (clone, original, type) => {
+				// Badge the floating mirror with how many items the drop will insert.
+				if (type !== 'mirror')
+					return;
+				const count = this.#collectDragIds(original).length;
+				if (count > 1)
+					clone.setAttribute('data-drag-count', String(count));
 			})
 			.on('shadow', (el) => {
 					el.classList.add('dragula-shadow');
@@ -118,30 +126,75 @@ export class DragDropHandler
 					// We find the index of 'sibling' in the  'target'-Container
 					droppedIndex = Array.from(target.children).indexOf(sibling);
 				}
-				const selectDataId = el.getAttribute('data-select-id');
+				// The dropped `el` is dragula's copy inside the playlist; take it out first so
+				// the indexes used below refer to real playlist items only.
+				const ids = this.#collectDragIds(el);
+				el.remove();
 
 				let result = null;
-				switch (this.#source)
+				let inserted = 0;
+				for (const id of ids)
 				{
-					case "mediapool":
-						result = await this.#itemService.insertMedia(selectDataId, this.#playlistId, droppedIndex);
-						break;
-					case "playlists":
-						result = await this.#itemService.insertPlaylist(selectDataId, this.#playlistId, droppedIndex);
-						break;
-					case "templates":
-						result = await this.#itemService.insertTemplate(selectDataId, this.#playlistId, droppedIndex);
-						break;
-					default:
-						throw new Error("Unknown source");
+					const position = droppedIndex + inserted;
+					switch (this.#source)
+					{
+						case "mediapool":
+							result = await this.#itemService.insertMedia(id, this.#playlistId, position);
+							break;
+						case "playlists":
+							result = await this.#itemService.insertPlaylist(id, this.#playlistId, position);
+							break;
+						case "templates":
+							result = await this.#itemService.insertTemplate(id, this.#playlistId, position);
+							break;
+						default:
+							throw new Error("Unknown source");
+					}
+
+					if (!result?.data?.item)
+						continue; // server rejected this one; keep going with the rest
+
+					this.#itemList.createPlaylistItem(result.data.item, position);
+					inserted++;
 				}
 
-				this.#itemList.createPlaylistItem(result.data.item, droppedIndex);
+				if (inserted === 0)
+					return;
+
 				this.#itemList.displayPlaylistMetrics(result.data.playlist_metrics);
 				PlaylistsProperties.notifySave();
-
-				// for debug only console.log('Element:','Position: ', droppedIndex);
-				el.remove();
+				this.#clearSourceSelection();
 			});
+	}
+
+	/**
+	 * Which source ids a drag of `el` stands for.
+	 * If the dragged thumbnail is one of several selected items, the whole selection
+	 * (in grid order) is inserted; otherwise just the dragged item.
+	 */
+	#collectDragIds(el)
+	{
+		const draggedId = el.getAttribute('data-select-id');
+		if (draggedId === null)
+			return [];
+
+		if (this.#dropSource === null || !el.classList.contains('selected'))
+			return [draggedId];
+
+		const selectedIds = Array.from(this.#dropSource.querySelectorAll('.selected[data-select-id]'))
+			.map(item => item.getAttribute('data-select-id'));
+
+		if (selectedIds.length === 0 || !selectedIds.includes(draggedId))
+			return [draggedId];
+
+		return selectedIds;
+	}
+
+	#clearSourceSelection()
+	{
+		if (this.#dropSource === null)
+			return;
+
+		this.#dropSource.querySelectorAll('.selected').forEach(item => item.classList.remove('selected'));
 	}
 }
