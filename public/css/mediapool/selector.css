@@ -2,6 +2,8 @@
 {
     display: flex;
     gap: 1rem;
+    height: 100%;
+    min-height: 0;
 }
     .mediaSelectContainer aside, #treeViewFilter
     {
@@ -9,9 +11,59 @@
         overflow-y: auto;
     }
 
-    .mediaSelectContainer .media-list-grid-view
+    .mediaSelectContainer .mediaSelectMain
     {
         flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        max-height: 73.8vh;
+    }
+
+    .mediaSelectToolbar
+    {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--gh-border-color, #ccc);
+    }
+    .mediaSelectToolbar #addSelectedToPlaylist
+    {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+    }
+    .mediaSelectToolbar #addSelectedToPlaylist:disabled
+    {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .mediaSelectToolbar .media-selection-count
+    {
+        display: inline-block;
+        min-width: 1.4em;
+        padding: 0 0.35em;
+        border-radius: 1em;
+        font-size: 0.85em;
+        font-weight: bold;
+        line-height: 1.4em;
+        text-align: center;
+        color: #fff;
+        background-color: var(--gh-primary-color);
+    }
+    .mediaSelectToolbar .mediaSelectHint
+    {
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+
+    .mediaSelectContainer .media-list-grid-view
+    {
+        flex: 1;
         display:grid;
         grid-template-columns: repeat(auto-fill, 100px);
         /* Rows must be implicit. `grid-template-rows: repeat(auto-fill, 100px)` only
@@ -24,7 +76,7 @@
         padding: 1em;
         box-sizing: border-box;
         overflow-y: auto;
-        max-height: 73.8vh;
+        min-height: 0;
         user-select: none;
     }
             .media-item

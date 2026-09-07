@@ -105,6 +105,7 @@ export class MediaSelector
 	{
 		this.#selectedElements().forEach(el => el.classList.remove('selected'));
 		this.#selectionAnchor = null;
+		this.#emitSelectionChanged();
 	}
 
 	// kept for callers using the lowercase spelling
@@ -127,6 +128,7 @@ export class MediaSelector
 
 		const mediaList = document.getElementById('mediaList');
 		mediaList.addEventListener('click', (e) => this.#onItemClick(e, mediaList));
+		this.#emitSelectionChanged();
 	}
 
 	/**
@@ -151,6 +153,7 @@ export class MediaSelector
 			this.#selectedElements().forEach(el => { if (el !== item) el.classList.remove('selected'); });
 			item.classList.toggle('selected');
 			this.#selectionAnchor = item.classList.contains('selected') ? item : null;
+			this.#emitSelectionChanged();
 			return;
 		}
 
@@ -163,11 +166,13 @@ export class MediaSelector
 			for (let i = start; i <= end; i++)
 				items[i].classList.add('selected');
 			// anchor stays put so a second Shift+click extends from the same origin
+			this.#emitSelectionChanged();
 			return;
 		}
 
 		item.classList.toggle('selected');
 		this.#selectionAnchor = item;
+		this.#emitSelectionChanged();
 	}
 
 	#selectedElements()
@@ -179,6 +184,12 @@ export class MediaSelector
 		return [...mediaList.querySelectorAll('.media-item.selected')];
 	}
 
+	#emitSelectionChanged()
+	{
+		const ids = this.getSelectedIds();
+		this.#emitter.emit('mediapool:selector:selectionChanged', { count: ids.length, ids });
+	}
+
 	async loadMedia(nodeId)
 	{
 		return await this.#mediaService.loadFilteredMediaByNodeId(nodeId, this.#filter);
@@ -188,6 +199,7 @@ export class MediaSelector
 	{
 		this.#selectorView.displayMediaList(mediaList);
 		this.#selectionAnchor = null; // the grid was rebuilt, old anchor element is gone
+		this.#emitSelectionChanged();
 	}
 
 	#initEvents()

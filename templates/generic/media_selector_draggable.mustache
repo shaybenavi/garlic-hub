@@ -10,9 +10,19 @@
 				</nav>
 			</aside>
 
-			<section id="mediaList" class="media-list-grid-view" aria-labelledby="media-list-title">
+			<div class="mediaSelectMain">
+				<div class="mediaSelectToolbar">
+					<button type="button" id="addSelectedToPlaylist" disabled>
+						<i class="bi bi-plus-lg" aria-hidden="true"></i>
+						Add to playlist
+						<span id="mediaSelectionCount" class="media-selection-count" hidden></span>
+					</button>
+					<span class="mediaSelectHint">Click to multi-select · Shift+click for a range · or drag onto the playlist</span>
+				</div>
+				<section id="mediaList" class="media-list-grid-view" aria-labelledby="media-list-title">
 
-			</section>
+				</section>
+			</div>
 	</div>
 </template>
 

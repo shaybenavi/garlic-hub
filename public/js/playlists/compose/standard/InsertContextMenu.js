@@ -4,6 +4,7 @@ export class InsertContextMenu
 	#selectorFactory         = null;
 	#dragDropHandler         = null;
 	#itemSelectContainer     = document.getElementById("itemSelectContainer");
+	#selectionListener       = null;
 
 	constructor(selectorFactory, dragDropHandler)
 	{
@@ -47,12 +48,66 @@ export class InsertContextMenu
 	async #insertMedia()
 	{
 		const selector = this.#selectorFactory.create("mediapool");
-		selector.enableMultiSelect(); // click several thumbnails, then drag any of them into the playlist
+		selector.enableMultiSelect(); // click several thumbnails, then add or drag into the playlist
 		await selector.showSelector(this.#itemSelectContainer);
 		this.#dragDropHandler.source = "mediapool";
 		this.#dragDropHandler.items = selector.getMediaItems();
 		const container = selector.getMediaItemsContainer();
 		this.#dragDropHandler.addDropSource(container);
+		this.#wireAddSelectedButton(selector);
+	}
+
+	#wireAddSelectedButton(selector)
+	{
+		const button = document.getElementById("addSelectedToPlaylist");
+		const countEl = document.getElementById("mediaSelectionCount");
+		const container = selector.getMediaItemsContainer();
+		if (button === null)
+			return;
+
+		if (this.#selectionListener !== null)
+			selector.off("mediapool:selector:selectionChanged", this.#selectionListener);
+
+		const syncButton = ({ count }) =>
+		{
+			button.disabled = count < 1;
+			if (countEl === null)
+				return;
+			if (count < 1)
+			{
+				countEl.hidden = true;
+				countEl.textContent = "";
+			}
+			else
+			{
+				countEl.hidden = false;
+				countEl.textContent = String(count);
+			}
+		};
+
+		this.#selectionListener = syncButton;
+		selector.on("mediapool:selector:selectionChanged", syncButton);
+		if (container !== null)
+			container.addEventListener("mediapool:selectioncleared", () => syncButton({ count: 0 }));
+		syncButton({ count: selector.getSelectedIds().length });
+
+		button.onclick = async () =>
+		{
+			const ids = selector.getSelectedIds();
+			if (ids.length === 0)
+				return;
+
+			button.disabled = true;
+			try
+			{
+				await this.#dragDropHandler.insertIds(ids);
+				selector.clearSelection();
+			}
+			finally
+			{
+				syncButton({ count: selector.getSelectedIds().length });
+			}
+		};
 	}
 
 	async #insertExternalMedia()

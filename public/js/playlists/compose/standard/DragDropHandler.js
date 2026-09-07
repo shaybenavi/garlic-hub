@@ -196,5 +196,55 @@ export class DragDropHandler
 			return;
 
 		this.#dropSource.querySelectorAll('.selected').forEach(item => item.classList.remove('selected'));
+		this.#dropSource.dispatchEvent(new CustomEvent('mediapool:selectioncleared', { bubbles: true }));
+	}
+
+	/**
+	 * Insert the given source ids into the playlist (default: append at end).
+	 * Same path as a multi-item drag-and-drop, for the "Add to playlist" button.
+	 */
+	async insertIds(ids, position = null)
+	{
+		if (!Array.isArray(ids) || ids.length === 0)
+			return 0;
+
+		let droppedIndex = position;
+		if (droppedIndex === null || droppedIndex === undefined)
+			droppedIndex = this.#dropTarget.children.length;
+
+		let result = null;
+		let inserted = 0;
+		for (const id of ids)
+		{
+			const at = droppedIndex + inserted;
+			switch (this.#source)
+			{
+				case "mediapool":
+					result = await this.#itemService.insertMedia(id, this.#playlistId, at);
+					break;
+				case "playlists":
+					result = await this.#itemService.insertPlaylist(id, this.#playlistId, at);
+					break;
+				case "templates":
+					result = await this.#itemService.insertTemplate(id, this.#playlistId, at);
+					break;
+				default:
+					throw new Error("Unknown source");
+			}
+
+			if (!result?.data?.item)
+				continue;
+
+			this.#itemList.createPlaylistItem(result.data.item, at);
+			inserted++;
+		}
+
+		if (inserted === 0)
+			return 0;
+
+		this.#itemList.displayPlaylistMetrics(result.data.playlist_metrics);
+		PlaylistsProperties.notifySave();
+		this.#clearSourceSelection();
+		return inserted;
 	}
 }
