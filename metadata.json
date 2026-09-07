@@ -1,0 +1,6 @@
+{
+  "name": "Garlic-Hub",
+  "description": "Digital Signage Content and Device Management for SMIL compatible Media Player",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

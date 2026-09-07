@@ -1,0 +1,130 @@
+<%- include('partials/header') %>
+
+<main>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.25rem;">
+    <div>
+      <h1 style="margin-bottom:0.25rem; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.5rem;">
+        <i class="bi bi-layout-text-window"></i> Signage Template Designer
+      </h1>
+      <div style="font-size:0.9rem; color:#555;">
+        Multi-zone screen layouts, dynamic text banners, HTML widgets, and canvas blueprints
+      </div>
+    </div>
+    <div>
+      <button type="button" class="button add-unit" onclick="alert('New template workspace created. Choose a layout preset below.');">
+        <i class="bi bi-plus-lg"></i> New Template
+      </button>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 320px 1fr; gap:1.5rem;">
+    <!-- Template Preset List -->
+    <div class="main-element-group" style="margin-top:0;">
+      <h3 style="margin-top:0; color:var(--gh-primary-color); border-bottom:1px solid var(--gh-border-color); padding-bottom:0.5rem;">
+        <i class="bi bi-collection"></i> Screen Layout Presets
+      </h3>
+
+      <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        <% templates.forEach(function(t, idx) { %>
+          <div class="template-item" style="padding:0.75rem; border:1px solid var(--gh-border-color); border-radius:var(--gh-border-radius); cursor:pointer; background:var(--gh-surface-color); transition:border-color 0.2s ease;" onclick="loadTemplatePreset('<%= t.name %>', '<%= t.resolution %>', '<%= t.orientation %>')">
+            <div style="font-weight:bold; color:var(--gh-primary-color);"><%= t.name %></div>
+            <div style="font-size:0.75rem; color:#666; margin:0.25rem 0;">
+              <%= t.resolution %> &bull; <%= t.orientation %> &bull; <span class="mode-badge"><%= t.type %></span>
+            </div>
+            <div style="font-size:0.75rem; color:#888;">Updated: <%= t.last_update %></div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+
+    <!-- Canvas Preview Workspace -->
+    <div class="main-element-group" style="margin-top:0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--gh-border-color); padding-bottom:0.5rem;">
+        <div>
+          <h3 id="currentTemplateTitle" style="margin:0; color:var(--gh-primary-color);">1080p Landscape Welcome Banner</h3>
+          <span id="currentTemplateRes" style="font-size:0.8rem; color:#666;">1920x1080 &bull; 16:9 Landscape</span>
+        </div>
+        <div style="display:flex; gap:0.5rem;">
+          <button type="button" class="button" onclick="resetCanvas()"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+          <button type="button" class="button add-unit" onclick="alert('Template layout saved to database!');"><i class="bi bi-save"></i> Save Blueprint</button>
+        </div>
+      </div>
+
+      <!-- Live Canvas Drawing Surface -->
+      <div style="background:#111; padding:1.5rem; border-radius:6px; display:flex; justify-content:center; align-items:center; overflow:hidden;">
+        <canvas id="signageCanvas" width="800" height="450" style="max-width:100%; border:2px solid #444; border-radius:4px; box-shadow:0 8px 24px rgba(0,0,0,0.5);"></canvas>
+      </div>
+
+      <div style="margin-top:1rem; display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:#555;">
+        <div><i class="bi bi-layers"></i> Zones: Main Video (70%), Side Ticker (30%), Header Clock</div>
+        <div style="font-family:monospace;">SMIL Region ID: region-main-01</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const canvas = document.getElementById('signageCanvas');
+  const ctx = canvas.getContext('2d');
+
+  function renderLandscapeBanner() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Background gradient
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grad.addColorStop(0, '#03393a');
+    grad.addColorStop(1, '#001a1a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Header Zone
+    ctx.fillStyle = 'rgba(0, 122, 80, 0.4)';
+    ctx.fillRect(0, 0, canvas.width, 60);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('GARLIC-HUB SIGNAGE DISPLAY', 30, 38);
+
+    ctx.font = '14px monospace';
+    ctx.fillText(new Date().toLocaleTimeString(), canvas.width - 120, 38);
+
+    // Main media placeholder zone
+    ctx.strokeStyle = '#007a50';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(30, 80, 500, 330);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(30, 80, 500, 330);
+
+    ctx.fillStyle = '#00c482';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('[ZONE 1: Primary Video / Image Sequence]', 70, 240);
+
+    // Side Widget Zone
+    ctx.strokeRect(550, 80, 220, 330);
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.fillRect(550, 80, 220, 330);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('[ZONE 2: Live Feed]', 570, 120);
+
+    ctx.font = '12px sans-serif';
+    ctx.fillStyle = '#bbb';
+    ctx.fillText('Weather: 22°C Sunny', 570, 160);
+    ctx.fillText('Flight Status: On Time', 570, 190);
+    ctx.fillText('Notice: Meeting at 3pm', 570, 220);
+  }
+
+  function loadTemplatePreset(name, res, orient) {
+    document.getElementById('currentTemplateTitle').textContent = name;
+    document.getElementById('currentTemplateRes').textContent = res + ' • ' + orient;
+    renderLandscapeBanner();
+  }
+
+  function resetCanvas() {
+    renderLandscapeBanner();
+  }
+
+  renderLandscapeBanner();
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,130 @@
+<%- include('partials/header') %>
+
+<main>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.25rem;">
+    <div>
+      <h1 style="margin-bottom:0.25rem; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.5rem;">
+        <i class="bi bi-people"></i> User Administration
+      </h1>
+      <div style="font-size:0.9rem; color:#555;">
+        System operators, multi-tenant roles, and access credentials
+      </div>
+    </div>
+    <div>
+      <button type="button" class="button add-unit" onclick="document.getElementById('addUserModal').classList.add('active');">
+        <i class="bi bi-plus-lg"></i> Add New User
+      </button>
+    </div>
+  </div>
+
+  <div class="main-element-group">
+    <ul class="results-listing">
+      <li class="results-header">
+        <span style="width:40px;">UID</span>
+        <span style="flex:1.5;">Username</span>
+        <span style="flex:2;">Email Address</span>
+        <span style="flex:1;">Role</span>
+        <span style="flex:1;">Status</span>
+        <span style="flex:1;">Locale</span>
+        <span style="flex:1.5;">Last Login</span>
+        <span style="width:120px; text-align:right;">Actions</span>
+      </li>
+
+      <% users.forEach(function(u) { %>
+        <li class="results-body">
+          <span style="width:40px; font-weight:bold; color:#777;">
+            <%= u.UID %>
+          </span>
+
+          <span style="flex:1.5; font-weight:bold; color:var(--gh-primary-color);">
+            <i class="bi bi-person-fill" style="margin-right:0.3rem;"></i> <%= u.username %>
+          </span>
+
+          <span style="flex:2; font-size:0.85rem; color:#555;">
+            <%= u.email %>
+          </span>
+
+          <span style="flex:1;">
+            <span class="mode-badge"><%= u.role %></span>
+          </span>
+
+          <span style="flex:1;">
+            <span class="status-pill status-pill--<%= u.status === 'Active' ? 'online' : 'standby' %>">
+              <%= u.status %>
+            </span>
+          </span>
+
+          <span style="flex:1; font-size:0.85rem;">
+            <%= u.locale %>
+          </span>
+
+          <span style="flex:1.5; font-size:0.8rem; color:#666;">
+            <%= u.last_login %>
+          </span>
+
+          <span style="width:120px; text-align:right;">
+            <button type="button" class="unit-action" onclick="alert('User settings for <%= u.username %>');" title="Edit Profile">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+            <% if (u.username !== 'admin') { %>
+              <form action="/users/delete/<%= u.UID %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete user <%= u.username %>?');">
+                <button type="submit" class="unit-action" style="color:var(--gh-danger-color);" title="Delete User">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            <% } %>
+          </span>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+</main>
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal-overlay">
+  <div class="modal-window">
+    <div class="modal-header">
+      <h3 style="display:flex; align-items:center; gap:0.5rem;"><i class="bi bi-person-plus"></i> Create User Account</h3>
+      <button type="button" class="close-button" onclick="document.getElementById('addUserModal').classList.remove('active');">&times;</button>
+    </div>
+    <form action="/users/add" method="POST">
+      <div class="modal-body">
+        <label>
+          <span>Username</span>
+          <input type="text" name="username" required placeholder="e.g. jsmith" />
+        </label>
+        <label>
+          <span>Email</span>
+          <input type="email" name="email" required placeholder="e.g. jsmith@example.com" />
+        </label>
+        <label>
+          <span>Password</span>
+          <input type="password" name="password" required placeholder="••••••••" value="Demo1234!" />
+        </label>
+        <label>
+          <span>Access Role</span>
+          <select name="role">
+            <option value="Administrator">Administrator (Full Access)</option>
+            <option value="Editor">Editor (Manage Playlists & Media)</option>
+            <option value="Viewer">Viewer (Read-only)</option>
+          </select>
+        </label>
+        <label>
+          <span>Preferred Locale</span>
+          <select name="locale">
+            <option value="en_US">English (en_US)</option>
+            <option value="de_DE">Deutsch (de_DE)</option>
+            <option value="es_ES">Español (es_ES)</option>
+            <option value="fr_FR">Français (fr_FR)</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="document.getElementById('addUserModal').classList.remove('active');">Cancel</button>
+        <button type="submit" class="add-unit"><i class="bi bi-check2"></i> Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,52 @@
+<%- include('partials/header', { extraCss: '/css/user/login.css', noHeader: true }) %>
+
+<main style="display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:85vh;">
+  <form action="/login" method="POST" id="login_form">
+    <fieldset>
+      <legend style="display:none;">Garlic-Hub Authentication</legend>
+
+      <div style="text-align:center; margin-bottom:1rem;">
+        <h2 style="margin:0; color:var(--gh-primary-color);">Digital Signage Management</h2>
+        <div style="font-size:0.85rem; color:#666;">Sign in to manage players, media and playlists</div>
+      </div>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="message-bar message-bar--error" style="border-radius:4px; margin-bottom:0.75rem; font-size:0.85rem;">
+          <%= error %>
+        </div>
+      <% } %>
+
+      <div class="field-wrapper">
+        <label>
+          <span style="font-weight:bold;">Username or Email</span>
+          <input type="text" name="username" value="admin" required autofocus autocomplete="username" />
+        </label>
+      </div>
+
+      <div class="field-wrapper">
+        <label>
+          <span style="font-weight:bold;">Password</span>
+          <input type="password" name="password" value="Demo1234!" required autocomplete="current-password" />
+        </label>
+      </div>
+
+      <label style="margin:0.5rem 0;">
+        <input type="checkbox" name="remember" checked />
+        <span style="font-size:0.85rem; color:#444;">Keep me logged in on this terminal</span>
+      </label>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+        <button type="submit" class="add-unit" style="width:100%; padding:0.5rem 1rem; font-size:1rem; font-weight:bold;">
+          <i class="bi bi-box-arrow-in-right"></i> Log In
+        </button>
+      </div>
+
+      <div style="margin-top:1.5rem; text-align:center; font-size:0.8rem; color:#777; border-top:1px solid var(--gh-border-color); padding-top:1rem;">
+        Default Demo Credentials:<br>
+        <strong>User:</strong> <code>admin</code> &bull; <strong>Password:</strong> <code>Demo1234!</code>
+      </div>
+    </fieldset>
+  </form>
+</main>
+
+<%- include('partials/footer') %>

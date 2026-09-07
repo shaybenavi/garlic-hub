@@ -1,0 +1,191 @@
+<%- include('partials/header') %>
+
+<main>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+    <div>
+      <h1 style="margin-bottom:0.25rem; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.5rem;">
+        <i class="bi bi-display"></i> Digital Signage Media Players
+      </h1>
+      <div style="font-size:0.9rem; color:#555;">
+        Connected hardware endpoints, playback statuses, and display schedules
+      </div>
+    </div>
+    <div>
+      <button type="button" class="button add-unit" onclick="document.getElementById('addPlayerModal').classList.add('active');">
+        <i class="bi bi-plus-lg"></i> Register New Player
+      </button>
+    </div>
+  </div>
+
+  <div class="main-element-group">
+    <!-- Filter bar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
+      <div style="display:flex; gap:0.5rem; align-items:center;">
+        <input type="text" id="playerSearch" placeholder="Search players by name, IP, or model..." style="width:320px;" onkeyup="filterPlayers()" />
+        <select id="statusFilter" onchange="filterPlayers()">
+          <option value="all">All Statuses</option>
+          <option value="online">Online</option>
+          <option value="standby">Standby</option>
+          <option value="offline">Offline</option>
+        </select>
+      </div>
+      <div style="font-size:0.85rem; color:#666;">
+        Total: <strong><%= players.length %></strong> players configured
+      </div>
+    </div>
+
+    <!-- Players Table -->
+    <ul class="results-listing" id="playerList">
+      <li class="results-header">
+        <span style="width:90px;">Status</span>
+        <span style="flex:2;">Player Name & UUID</span>
+        <span style="flex:1.5;">Model & Resolution</span>
+        <span style="flex:1.5;">Network IP</span>
+        <span style="flex:2;">Assigned Playlist</span>
+        <span style="width:110px;">Last Contact</span>
+        <span style="width:160px; text-align:right;">Actions</span>
+      </li>
+
+      <% players.forEach(function(p) { %>
+        <li class="results-body player-row" data-status="<%= p.status %>" data-name="<%= p.player_name.toLowerCase() %>" data-ip="<%= p.ip %>" data-model="<%= p.model.toLowerCase() %>">
+          <span style="width:90px;">
+            <span class="status-pill status-pill--<%= p.status %>">
+              <i class="bi <%= p.status === 'online' ? 'bi-check-circle-fill' : (p.status === 'standby' ? 'bi-pause-circle-fill' : 'bi-x-circle-fill') %>"></i>
+              <%= p.status %>
+            </span>
+          </span>
+
+          <span style="flex:2;">
+            <a href="/player/edit/<%= p.player_id %>" style="font-weight:bold; color:var(--gh-primary-color);"><%= p.player_name %></a>
+            <div style="font-size:0.75rem; color:#888; font-family:monospace;"><%= p.uuid %></div>
+          </span>
+
+          <span style="flex:1.5; font-size:0.85rem;">
+            <div><strong><%= p.model %></strong></div>
+            <div style="font-size:0.75rem; color:#666;"><%= p.resolution %> &bull; <%= p.firmware %></div>
+          </span>
+
+          <span style="flex:1.5; font-size:0.85rem; font-family:monospace;">
+            <%= p.ip %>
+          </span>
+
+          <span style="flex:2;">
+            <form action="/player/assign/<%= p.player_id %>" method="POST" style="margin:0;">
+              <select name="playlist_id" onchange="this.form.submit()" style="font-size:0.85rem; padding:0.2rem 0.4rem; max-width:200px;">
+                <% playlists.forEach(function(pl) { %>
+                  <option value="<%= pl.playlist_id %>" <%= p.playlist_id === pl.playlist_id ? 'selected' : '' %>>
+                    <%= pl.playlist_name %> (<%= pl.playlist_mode %>)
+                  </option>
+                <% }); %>
+              </select>
+            </form>
+          </span>
+
+          <span style="width:110px; font-size:0.8rem; color:#666;">
+            <%= p.last_ping %>
+          </span>
+
+          <span style="width:160px; text-align:right;">
+            <!-- Push Update -->
+            <form action="/player/push/<%= p.player_id %>" method="POST" style="display:inline;">
+              <button type="submit" class="unit-action" title="Push Update to Player">
+                <i class="bi bi-arrow-repeat"></i>
+              </button>
+            </form>
+
+            <!-- Test Ping -->
+            <form action="/player/ping/<%= p.player_id %>" method="POST" style="display:inline;">
+              <button type="submit" class="unit-action" title="Ping Device">
+                <i class="bi bi-broadcast"></i>
+              </button>
+            </form>
+
+            <!-- Inspect SMIL -->
+            <a href="/smil-index?player_id=<%= p.player_id %>" target="_blank" class="unit-action" title="Inspect SMIL XML Feed">
+              <i class="bi bi-file-earmark-code"></i>
+            </a>
+
+            <!-- Settings -->
+            <a href="/player/edit/<%= p.player_id %>" class="unit-action" title="Device Settings">
+              <i class="bi bi-gear"></i>
+            </a>
+
+            <!-- Delete -->
+            <form action="/player/delete/<%= p.player_id %>" method="POST" style="display:inline;" onsubmit="return confirm('Remove player <%= p.player_name %>?');">
+              <button type="submit" class="unit-action" style="color:var(--gh-danger-color);" title="Delete Player">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </span>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+</main>
+
+<!-- Add Player Modal -->
+<div id="addPlayerModal" class="modal-overlay">
+  <div class="modal-window">
+    <div class="modal-header">
+      <h3 style="display:flex; align-items:center; gap:0.5rem;"><i class="bi bi-display"></i> Register Hardware Player</h3>
+      <button type="button" class="close-button" onclick="document.getElementById('addPlayerModal').classList.remove('active');">&times;</button>
+    </div>
+    <form action="/player/add" method="POST">
+      <div class="modal-body">
+        <label>
+          <span>Player Display Name</span>
+          <input type="text" name="player_name" required placeholder="e.g. 2nd Floor Meeting Screen" />
+        </label>
+        <label>
+          <span>Hardware Platform / Device Model</span>
+          <input type="text" name="model" required placeholder="e.g. Raspberry Pi 5, Android TV, Garlic-Box" value="Raspberry Pi 5" />
+        </label>
+        <label>
+          <span>Network IP Address or Hostname</span>
+          <input type="text" name="ip" required placeholder="e.g. 192.168.1.105" value="192.168.1.105" />
+        </label>
+        <label>
+          <span>Native Display Resolution</span>
+          <select name="resolution">
+            <option value="1920x1080">1920x1080 (Full HD Landscape)</option>
+            <option value="3840x2160">3840x2160 (4K UHD Landscape)</option>
+            <option value="1080x1920">1080x1920 (Portrait Totem)</option>
+            <option value="1280x720">1280x720 (720p HD)</option>
+          </select>
+        </label>
+        <label>
+          <span>Assigned Initial Playlist</span>
+          <select name="playlist_id">
+            <% playlists.forEach(function(pl) { %>
+              <option value="<%= pl.playlist_id %>"><%= pl.playlist_name %> (<%= pl.playlist_mode %>)</option>
+            <% }); %>
+          </select>
+        </label>
+        <label>
+          <span>Polling Refresh Rate (Seconds)</span>
+          <input type="number" name="refresh" value="300" min="10" />
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="document.getElementById('addPlayerModal').classList.remove('active');">Cancel</button>
+        <button type="submit" class="add-unit"><i class="bi bi-check2"></i> Save & Register</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function filterPlayers() {
+    const q = document.getElementById('playerSearch').value.toLowerCase();
+    const st = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('.player-row');
+
+    rows.forEach(r => {
+      const matchSearch = r.dataset.name.includes(q) || r.dataset.ip.includes(q) || r.dataset.model.includes(q);
+      const matchStatus = st === 'all' || r.dataset.status === st;
+      r.style.display = (matchSearch && matchStatus) ? 'flex' : 'none';
+    });
+  }
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,216 @@
+<%- include('partials/header') %>
+
+<main>
+  <div style="margin-bottom: 1.25rem;">
+    <a href="/playlists" style="display:inline-flex; align-items:center; gap:0.3rem; font-size:0.9rem; margin-bottom:0.5rem;">
+      <i class="bi bi-arrow-left"></i> Back to Playlists
+    </a>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h1 style="margin:0; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.5rem;">
+          <i class="bi bi-sliders2"></i> Playlist Composer: <%= playlist.playlist_name %>
+        </h1>
+        <div style="font-size:0.85rem; color:#666; margin-top:0.25rem;">
+          Mode: <span class="mode-badge" style="text-transform:uppercase;"><%= playlist.playlist_mode %></span> &bull;
+          Total Timeline Duration: <strong id="totalDurationLabel"><%= playlist.duration %></strong> seconds &bull;
+          <strong><%= playlist.items.length %></strong> slides configured
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.5rem;">
+        <a href="/smil-index?playlist_id=<%= playlist.playlist_id %>" target="_blank" class="button" style="text-decoration:none;">
+          <i class="bi bi-file-earmark-code"></i> Export SMIL Feed
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Simulated Digital Signage Player Screen -->
+  <div class="main-element-group" style="padding:1rem; margin-bottom:1.5rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+      <h3 style="margin:0; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.4rem;">
+        <i class="bi bi-tv"></i> Live Signage Player Simulation (16:9 1080p Preview)
+      </h3>
+      <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem;">
+        <button type="button" id="prevSlideBtn" class="unit-action"><i class="bi bi-skip-start-fill"></i></button>
+        <button type="button" id="playPauseBtn" class="unit-action"><i class="bi bi-pause-fill"></i></button>
+        <button type="button" id="nextSlideBtn" class="unit-action"><i class="bi bi-skip-end-fill"></i></button>
+        <span id="slideIndicator" style="font-family:monospace; margin-left:0.5rem;">Slide 1 / <%= playlist.items.length || 1 %></span>
+      </div>
+    </div>
+
+    <div style="position:relative; width:100%; max-width:860px; margin:0 auto; aspect-ratio:16/9; background:#000; border-radius:6px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.35); border:3px solid #333;">
+      <% if (playlist.items && playlist.items.length > 0) { %>
+        <% playlist.items.forEach(function(item, idx) { %>
+          <div class="preview-slide" id="slide-<%= idx %>" style="display:<%= idx === 0 ? 'block' : 'none' %>; width:100%; height:100%; position:relative;">
+            <img src="/media/<%= item.file_resource %>" alt="<%= item.item_name %>" style="width:100%; height:100%; object-fit:<%= item.fit || 'cover' %>;" />
+            <div style="position:absolute; bottom:0; left:0; width:100%; background:linear-gradient(transparent, rgba(0,0,0,0.75)); padding:1rem; color:#fff; display:flex; justify-content:space-between; align-items:flex-end;">
+              <div>
+                <div style="font-size:1.1rem; font-weight:bold;"><%= item.item_name %></div>
+                <div style="font-size:0.8rem; opacity:0.85;">Duration: <%= item.duration %>s &bull; Format: <%= item.item_type %></div>
+              </div>
+              <div style="background:rgba(0,122,80,0.85); padding:0.25rem 0.6rem; border-radius:4px; font-size:0.75rem; font-weight:bold;">
+                GARLIC-PLAYER ACTIVE
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#888;">
+          <i class="bi bi-images" style="font-size:3rem; margin-bottom:0.5rem;"></i>
+          <div>Playlist is empty. Add media assets from the right panel below.</div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Composer: Sequence Timeline on Left, Mediapool Selector on Right -->
+  <div class="playlist-composer">
+    <!-- Sequence Timeline -->
+    <div class="main-element-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--gh-border-color); padding-bottom:0.5rem;">
+        <h3 style="margin:0; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.4rem;">
+          <i class="bi bi-list-ol"></i> Sequence Timeline (<%= playlist.items.length %> Slides)
+        </h3>
+        <span style="font-size:0.8rem; color:#666;">Playback Order (Sequential)</span>
+      </div>
+
+      <% if (playlist.items && playlist.items.length > 0) { %>
+        <div class="sequence-list">
+          <% playlist.items.forEach(function(item, idx) { %>
+            <div class="sequence-item">
+              <span style="font-weight:bold; color:#777; width:24px;"><%= idx + 1 %></span>
+              <img src="/media/<%= item.file_resource %>" class="sequence-thumb" alt="<%= item.item_name %>" />
+              
+              <div style="flex:1;">
+                <div style="font-weight:bold; color:var(--gh-primary-color);"><%= item.item_name %></div>
+                <div style="font-size:0.75rem; color:#666;"><%= item.file_resource %></div>
+              </div>
+
+              <!-- Inline Duration Adjustment Form -->
+              <form action="/playlists/<%= playlist.playlist_id %>/items/<%= item.item_id %>/duration" method="POST" style="display:flex; align-items:center; gap:0.4rem; margin:0;">
+                <span style="font-size:0.8rem; color:#555;">Duration:</span>
+                <input type="number" name="duration" value="<%= item.duration %>" min="1" max="600" style="width:65px; font-size:0.85rem;" />
+                <span style="font-size:0.8rem; color:#555;">s</span>
+                <button type="submit" class="unit-action" title="Save Duration"><i class="bi bi-check2"></i></button>
+              </form>
+
+              <!-- Remove Item -->
+              <form action="/playlists/<%= playlist.playlist_id %>/items/<%= item.item_id %>/remove" method="POST" style="margin:0;" onsubmit="return confirm('Remove this slide from playlist?');">
+                <button type="submit" class="unit-action" style="color:var(--gh-danger-color);" title="Remove Item"><i class="bi bi-trash"></i></button>
+              </form>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <div style="padding:2rem; text-align:center; color:#777;">
+          No slides added to this playlist yet. Pick any asset from the Mediapool on the right to append it to the timeline.
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Quick Mediapool Selector -->
+    <div class="main-element-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--gh-border-color); padding-bottom:0.5rem;">
+        <h3 style="margin:0; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.4rem;">
+          <i class="bi bi-folder-plus"></i> Add from Mediapool
+        </h3>
+        <a href="/mediapool" style="font-size:0.8rem;">Browse Full Library &rarr;</a>
+      </div>
+
+      <p style="font-size:0.8rem; color:#555; margin-bottom:0.75rem;">
+        Click <strong>[+ Add]</strong> to insert asset into this playlist:
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:0.5rem; max-height:480px; overflow-y:auto;">
+        <% allMedia.forEach(function(media) { %>
+          <div style="display:flex; align-items:center; justify-content:space-between; background:var(--gh-surface-color); border:1px solid var(--gh-border-color); border-radius:4px; padding:0.4rem 0.6rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <img src="/media/<%= media.filename %>" style="width:40px; height:30px; object-fit:cover; border-radius:3px;" />
+              <div>
+                <div style="font-size:0.8rem; font-weight:bold; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><%= media.title %></div>
+                <div style="font-size:0.7rem; color:#888;"><%= media.resolution %></div>
+              </div>
+            </div>
+
+            <form action="/playlists/<%= playlist.playlist_id %>/items/add" method="POST" style="margin:0;">
+              <input type="hidden" name="media_id" value="<%= media.media_id %>" />
+              <input type="hidden" name="duration" value="15" />
+              <button type="submit" class="button add-unit" style="padding:0.15rem 0.5rem; font-size:0.75rem;">
+                <i class="bi bi-plus"></i> Add
+              </button>
+            </form>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Simple Slide Player Controller
+  const totalSlides = <%= playlist.items ? playlist.items.length : 0 %>;
+  let currentSlide = 0;
+  let isPlaying = true;
+  let slideTimer = null;
+
+  const durations = [
+    <% if (playlist.items && playlist.items.length > 0) { %>
+      <%= playlist.items.map(i => i.duration * 1000).join(',') %>
+    <% } %>
+  ];
+
+  function showSlide(index) {
+    if (totalSlides === 0) return;
+    for (let i = 0; i < totalSlides; i++) {
+      const el = document.getElementById('slide-' + i);
+      if (el) el.style.display = (i === index) ? 'block' : 'none';
+    }
+    currentSlide = index;
+    const ind = document.getElementById('slideIndicator');
+    if (ind) ind.textContent = 'Slide ' + (currentSlide + 1) + ' / ' + totalSlides;
+  }
+
+  function nextSlide() {
+    if (totalSlides === 0) return;
+    const nextIdx = (currentSlide + 1) % totalSlides;
+    showSlide(nextIdx);
+    scheduleNext();
+  }
+
+  function prevSlide() {
+    if (totalSlides === 0) return;
+    const prevIdx = (currentSlide - 1 + totalSlides) % totalSlides;
+    showSlide(prevIdx);
+    scheduleNext();
+  }
+
+  function scheduleNext() {
+    if (slideTimer) clearTimeout(slideTimer);
+    if (isPlaying && totalSlides > 0) {
+      const dur = durations[currentSlide] || 5000;
+      slideTimer = setTimeout(nextSlide, dur);
+    }
+  }
+
+  const prevBtn = document.getElementById('prevSlideBtn');
+  const nextBtn = document.getElementById('nextSlideBtn');
+  const playBtn = document.getElementById('playPauseBtn');
+
+  if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+  if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+  if (playBtn) {
+    playBtn.addEventListener('click', function() {
+      isPlaying = !isPlaying;
+      this.innerHTML = isPlaying ? '<i class="bi bi-pause-fill"></i>' : '<i class="bi bi-play-fill"></i>';
+      if (isPlaying) scheduleNext();
+      else if (slideTimer) clearTimeout(slideTimer);
+    });
+  }
+
+  if (totalSlides > 0) {
+    scheduleNext();
+  }
+</script>
+
+<%- include('partials/footer') %>

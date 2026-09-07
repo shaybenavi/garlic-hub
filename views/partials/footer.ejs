@@ -1,0 +1,29 @@
+  <footer>
+    <nav>
+      <ul>
+        <li><span style="font-weight:bold; color:var(--gh-primary-color);"><i class="bi bi-broadcast-pin"></i> Garlic-Hub</span> Digital Signage v1.0.0</li>
+        <li>Node.js 22 LTS Runtime</li>
+        <li><a href="/smil-index" target="_blank"><i class="bi bi-file-earmark-code"></i> SMIL Feed</a></li>
+        <li><a href="/legals"><i class="bi bi-file-text"></i> License & Legals</a></li>
+        <li id="compile_time"><i class="bi bi-cpu"></i> Port 3000 &bull; Online</li>
+      </ul>
+    </nav>
+  </footer>
+
+  <!-- Notification Toast or Dialog backdrop script if needed -->
+  <script>
+    // Language menu behavior helper
+    const langSelect = document.getElementById("language_select");
+    if (langSelect) {
+      langSelect.addEventListener("mouseenter", function() {
+        const drop = this.querySelector("ul");
+        if (drop) drop.style.display = "block";
+      });
+      langSelect.addEventListener("mouseleave", function() {
+        const drop = this.querySelector("ul");
+        if (drop) drop.style.display = "none";
+      });
+    }
+  </script>
+</body>
+</html>

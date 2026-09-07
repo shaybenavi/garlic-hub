@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title ? title + ' - Garlic-Hub' : 'Garlic-Hub - Digital Signage Platform' %></title>
+  <meta name="description" content="Digital Signage Content and Device Management for SMIL compatible Media Player">
+  <meta property="og:title" content="<%= title ? title + ' - Garlic-Hub' : 'Garlic-Hub - Digital Signage Platform' %>">
+  <meta property="og:description" content="Digital Signage Content and Device Management for SMIL compatible Media Player">
+  
+  <link rel="stylesheet" href="/css/external/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/css/theme-base.css">
+  <% if (typeof extraCss !== 'undefined' && extraCss) { %>
+    <link rel="stylesheet" href="<%= extraCss %>">
+  <% } %>
+  <link rel="stylesheet" href="/css/garlic-app.css">
+</head>
+<body>
+  <% if (typeof noHeader === 'undefined' || !noHeader) { %>
+  <header>
+    <nav>
+      <a href="/" style="display:flex; align-items:center; gap: 0.5rem; text-decoration:none; padding: 0.25rem 0;">
+        <img src="/images/logo.svg" alt="Garlic-Hub" style="height: 38px; width: auto; max-width:180px;" />
+      </a>
+      <ul class="menu main-menu">
+        <li><a href="/" class="<%= currentPath === '/' ? 'nav-active' : '' %>"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+        <li><a href="/player" class="<%= currentPath.startsWith('/player') ? 'nav-active' : '' %>"><i class="bi bi-display"></i> Players</a></li>
+        <li><a href="/playlists" class="<%= currentPath.startsWith('/playlists') ? 'nav-active' : '' %>"><i class="bi bi-collection-play"></i> Playlists</a></li>
+        <li><a href="/mediapool" class="<%= currentPath.startsWith('/mediapool') ? 'nav-active' : '' %>"><i class="bi bi-folder2-open"></i> Mediapool</a></li>
+        <li><a href="/templates" class="<%= currentPath.startsWith('/templates') ? 'nav-active' : '' %>"><i class="bi bi-layout-text-window"></i> Templates</a></li>
+        <li><a href="/users" class="<%= currentPath.startsWith('/users') ? 'nav-active' : '' %>"><i class="bi bi-people"></i> Users</a></li>
+      </ul>
+
+      <ul class="menu right_menu">
+        <li id="language_select">
+          <a href="#" style="display:flex;align-items:center;gap:0.35rem;">
+            <i class="bi bi-globe"></i> <span>EN</span> <i class="bi bi-chevron-down" style="font-size:0.75rem;"></i>
+          </a>
+          <ul>
+            <li><a href="?lang=en_US"><i class="bi bi-check2"></i> English (US)</a></li>
+            <li><a href="?lang=de_DE">Deutsch (DE)</a></li>
+            <li><a href="?lang=es_ES">Español (ES)</a></li>
+            <li><a href="?lang=fr_FR">Français (FR)</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#" style="display:flex;align-items:center;gap:0.35rem;">
+            <i class="bi bi-person-circle"></i> <span><%= typeof user !== 'undefined' && user ? user.username : 'admin' %></span> <i class="bi bi-chevron-down" style="font-size:0.75rem;"></i>
+          </a>
+          <ul>
+            <li><a href="/users"><i class="bi bi-gear"></i> Manage Users</a></li>
+            <li><a href="/legals"><i class="bi bi-shield-check"></i> Legal Notice</a></li>
+            <li><a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </header>
+  <% } %>
+
+  <% if (typeof flash !== 'undefined' && flash && flash.message) { %>
+    <div class="message-bar message-bar--<%= flash.type || 'success' %>" id="flashMessageBar">
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <i class="bi <%= flash.type === 'error' ? 'bi-exclamation-triangle-fill' : flash.type === 'information' ? 'bi-info-circle-fill' : 'bi-check-circle-fill' %>"></i>
+        <span><%= flash.message %></span>
+      </div>
+      <button type="button" class="close-button" onclick="document.getElementById('flashMessageBar').remove();">&times;</button>
+    </div>
+  <% } %>

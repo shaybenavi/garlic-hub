@@ -1,0 +1,234 @@
+<%- include('partials/header') %>
+
+<main style="display:grid; grid-template-columns: 240px 1fr; gap:1.25rem;">
+  <!-- Left Column: Folder Tree -->
+  <aside>
+    <div class="main-element-group" style="padding:0.75rem;">
+      <div style="font-weight:bold; color:var(--gh-primary-color); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;">
+        <i class="bi bi-folder2-open"></i> Mediapool Folders
+      </div>
+
+      <div id="wrap_tree_filter" style="margin-bottom:0.75rem;">
+        <input type="text" id="treeFilter" placeholder="Filter folders..." style="width:100%; font-size:0.8rem;" onkeyup="filterFolders()" />
+      </div>
+
+      <ul style="list-style:none; padding:0; margin:0; font-size:0.85rem; display:flex; flex-direction:column; gap:0.25rem;" id="folderList">
+        <li>
+          <a href="/mediapool?category=all" style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.5rem; border-radius:4px; font-weight:bold; <%= selectedCategory === 'all' ? 'background:var(--gh-primary-bgcolor); color:var(--gh-primary-color);' : 'color:#333;' %>">
+            <i class="bi bi-hdd-network"></i> All Media (<%= media.length %>)
+          </a>
+        </li>
+        <li>
+          <a href="/mediapool?category=images" style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.5rem; border-radius:4px; <%= selectedCategory === 'images' ? 'background:var(--gh-primary-bgcolor); color:var(--gh-primary-color); font-weight:bold;' : 'color:#333;' %>">
+            <i class="bi bi-image"></i> Images (<%= media.filter(m => m.category === 'images').length %>)
+          </a>
+        </li>
+        <li>
+          <a href="/mediapool?category=videos" style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.5rem; border-radius:4px; <%= selectedCategory === 'videos' ? 'background:var(--gh-primary-bgcolor); color:var(--gh-primary-color); font-weight:bold;' : 'color:#333;' %>">
+            <i class="bi bi-camera-video"></i> Videos (2)
+          </a>
+        </li>
+        <li>
+          <a href="/mediapool?category=widgets" style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.5rem; border-radius:4px; <%= selectedCategory === 'widgets' ? 'background:var(--gh-primary-bgcolor); color:var(--gh-primary-color); font-weight:bold;' : 'color:#333;' %>">
+            <i class="bi bi-app-indicator"></i> HTML5 Widgets (3)
+          </a>
+        </li>
+        <li>
+          <a href="/mediapool?category=documents" style="display:flex; align-items:center; gap:0.4rem; padding:0.35rem 0.5rem; border-radius:4px; <%= selectedCategory === 'documents' ? 'background:var(--gh-primary-bgcolor); color:var(--gh-primary-color); font-weight:bold;' : 'color:#333;' %>">
+            <i class="bi bi-file-earmark-text"></i> Documents (1)
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="main-element-group" style="padding:0.75rem; font-size:0.8rem; color:#555;">
+      <div style="font-weight:bold; color:var(--gh-primary-color); margin-bottom:0.3rem;"><i class="bi bi-info-circle"></i> Storage Health</div>
+      <div>Disk Usage: <strong>24.8 MB</strong> / 10 GB</div>
+      <div style="background:#e0eaf4; height:6px; border-radius:3px; overflow:hidden; margin:0.4rem 0;">
+        <div style="background:var(--gh-secondary-color); width:12%; height:100%;"></div>
+      </div>
+      <div>Supported: JPEG, PNG, WEBP, MP4, WebM, HTML, SMIL</div>
+    </div>
+  </aside>
+
+  <!-- Right Column: Media Content Gallery -->
+  <section class="content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+      <div>
+        <h1 style="margin:0; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.5rem;">
+          <i class="bi bi-folder2-open"></i> Mediapool Asset Manager
+        </h1>
+        <div style="font-size:0.85rem; color:#666;">
+          Category: <strong style="text-transform:capitalize;"><%= selectedCategory %></strong> &bull;
+          <span><%= filteredMedia.length %> asset(s)</span>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.5rem;">
+        <button type="button" class="button add-unit" onclick="document.getElementById('uploadDialog').classList.add('active');">
+          <i class="bi bi-cloud-arrow-up"></i> Upload Media
+        </button>
+      </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="main-element-group" style="margin-top:0;">
+      <!-- Search filter -->
+      <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+        <input type="text" id="mediaSearch" placeholder="Search media by title or filename..." style="width:300px;" onkeyup="searchMedia()" />
+        <div style="font-size:0.8rem; color:#777;">
+          Showing <%= filteredMedia.length %> items
+        </div>
+      </div>
+
+      <div class="media-grid" id="mediaGrid">
+        <% filteredMedia.forEach(function(m) { %>
+          <div class="media-card" data-title="<%= m.title.toLowerCase() %>" data-filename="<%= m.filename.toLowerCase() %>">
+            <img src="/media/<%= m.filename %>" class="media-thumb" alt="<%= m.title %>" onclick="openMediaDetail('<%= m.media_id %>')" title="Click for details" />
+            <div class="media-meta">
+              <div class="media-title" title="<%= m.title %>"><%= m.title %></div>
+              <div class="media-sub"><%= m.resolution %> &bull; <%= m.filesize %></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem;">
+                <button type="button" class="unit-action" style="padding:4px;" onclick="openMediaDetail('<%= m.media_id %>')" title="Inspect Info">
+                  <i class="bi bi-info-circle"></i>
+                </button>
+                <a href="/media/<%= m.filename %>" target="_blank" class="unit-action" style="padding:4px;" title="Full View">
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+                <form action="/mediapool/delete/<%= m.media_id %>" method="POST" style="margin:0;" onsubmit="return confirm('Delete asset <%= m.title %>?');">
+                  <button type="submit" class="unit-action" style="padding:4px; color:var(--gh-danger-color);" title="Delete Asset">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Upload Media Modal -->
+<div id="uploadDialog" class="modal-overlay">
+  <div class="modal-window">
+    <div class="modal-header">
+      <h3 style="display:flex; align-items:center; gap:0.5rem;"><i class="bi bi-cloud-arrow-up"></i> Upload Media Asset</h3>
+      <button type="button" class="close-button" onclick="document.getElementById('uploadDialog').classList.remove('active');">&times;</button>
+    </div>
+    <form action="/mediapool/upload" method="POST">
+      <div class="modal-body">
+        <label>
+          <span>Asset Title</span>
+          <input type="text" name="title" required placeholder="e.g. Spring Sale Promo Banner" />
+        </label>
+        <label>
+          <span>Asset Category</span>
+          <select name="category">
+            <option value="images">Images (JPG, PNG, WebP)</option>
+            <option value="videos">Videos (MP4, WebM)</option>
+            <option value="widgets">HTML5 Interactive Widgets</option>
+            <option value="documents">Documents (PDF, Text)</option>
+          </select>
+        </label>
+        <label>
+          <span>Select Pre-staged Demo Asset or Custom File</span>
+          <select name="filename">
+            <% allAvailableFiles.forEach(function(f) { %>
+              <option value="<%= f %>"><%= f %></option>
+            <% }); %>
+          </select>
+        </label>
+        <label>
+          <span>Resolution</span>
+          <input type="text" name="resolution" value="1920x1080" />
+        </label>
+        <label>
+          <span>Tags (comma separated)</span>
+          <input type="text" name="tags" placeholder="signage, lobby, promotion, 1080p" />
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="document.getElementById('uploadDialog').classList.remove('active');">Cancel</button>
+        <button type="submit" class="add-unit"><i class="bi bi-check2"></i> Catalog & Upload</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Media Detail Modal -->
+<div id="mediaDetailModal" class="modal-overlay">
+  <div class="modal-window">
+    <div class="modal-header">
+      <h3 id="modalMediaTitle" style="display:flex; align-items:center; gap:0.5rem;"><i class="bi bi-image"></i> Asset Inspection</h3>
+      <button type="button" class="close-button" onclick="document.getElementById('mediaDetailModal').classList.remove('active');">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center; margin-bottom:1rem;">
+        <img id="modalMediaImage" src="" style="max-height:240px; max-width:100%; border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,0.2);" />
+      </div>
+      <table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="font-weight:bold; width:35%; padding:0.4rem 0;">Filename:</td>
+          <td id="modalMediaFilename" style="font-family:monospace;"></td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="font-weight:bold; padding:0.4rem 0;">Resolution:</td>
+          <td id="modalMediaResolution"></td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="font-weight:bold; padding:0.4rem 0;">File Size:</td>
+          <td id="modalMediaSize"></td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="font-weight:bold; padding:0.4rem 0;">MIME Type:</td>
+          <td id="modalMediaMime">image/jpeg</td>
+        </tr>
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="font-weight:bold; padding:0.4rem 0;">Direct URL:</td>
+          <td><a id="modalMediaUrl" href="" target="_blank" style="color:var(--gh-primary-color);">Open Raw File &rarr;</a></td>
+        </tr>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" onclick="document.getElementById('mediaDetailModal').classList.remove('active');">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const mediaData = <%- JSON.stringify(media) %>;
+
+  function searchMedia() {
+    const q = document.getElementById('mediaSearch').value.toLowerCase();
+    const cards = document.querySelectorAll('.media-card');
+    cards.forEach(c => {
+      const match = c.dataset.title.includes(q) || c.dataset.filename.includes(q);
+      c.style.display = match ? 'flex' : 'none';
+    });
+  }
+
+  function filterFolders() {
+    const q = document.getElementById('treeFilter').value.toLowerCase();
+    const items = document.querySelectorAll('#folderList li');
+    items.forEach(li => {
+      li.style.display = li.textContent.toLowerCase().includes(q) ? 'block' : 'none';
+    });
+  }
+
+  function openMediaDetail(mediaId) {
+    const item = mediaData.find(m => String(m.media_id) === String(mediaId));
+    if (!item) return;
+
+    document.getElementById('modalMediaTitle').textContent = item.title;
+    document.getElementById('modalMediaImage').src = '/media/' + item.filename;
+    document.getElementById('modalMediaFilename').textContent = item.filename;
+    document.getElementById('modalMediaResolution').textContent = item.resolution;
+    document.getElementById('modalMediaSize').textContent = item.filesize;
+    document.getElementById('modalMediaUrl').href = '/media/' + item.filename;
+
+    document.getElementById('mediaDetailModal').classList.add('active');
+  }
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,131 @@
+<%- include('partials/header') %>
+
+<main>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+    <div>
+      <h1 style="margin-bottom:0.25rem; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.5rem;">
+        <i class="bi bi-collection-play"></i> Signage Playlists
+      </h1>
+      <div style="font-size:0.9rem; color:#555;">
+        Multi-zone channel sequences, slide loops, and SMIL playlist orchestration
+      </div>
+    </div>
+    <div>
+      <button type="button" class="button add-unit" onclick="document.getElementById('createPlaylistModal').classList.add('active');">
+        <i class="bi bi-plus-lg"></i> Create New Playlist
+      </button>
+    </div>
+  </div>
+
+  <div class="main-element-group">
+    <ul class="results-listing">
+      <li class="results-header">
+        <span style="width:50px;">ID</span>
+        <span style="flex:2.5;">Playlist Name</span>
+        <span style="flex:1.2;">Mode</span>
+        <span style="flex:1;">Duration</span>
+        <span style="flex:1;">Media Items</span>
+        <span style="flex:1;">Shuffle</span>
+        <span style="flex:1.5;">Last Modified</span>
+        <span style="width:180px; text-align:right;">Actions</span>
+      </li>
+
+      <% playlists.forEach(function(pl) { %>
+        <li class="results-body">
+          <span style="width:50px; font-weight:bold; color:#777;">
+            #<%= pl.playlist_id %>
+          </span>
+
+          <span style="flex:2.5; font-weight:bold;">
+            <a href="/playlists/compose/<%= pl.playlist_id %>" style="color:var(--gh-primary-color); font-size:1rem;">
+              <%= pl.playlist_name %>
+            </a>
+          </span>
+
+          <span style="flex:1.2;">
+            <span class="mode-badge" style="text-transform:uppercase;">
+              <%= pl.playlist_mode %>
+            </span>
+          </span>
+
+          <span style="flex:1; font-size:0.85rem;">
+            <i class="bi bi-stopwatch"></i> <%= pl.duration %> sec
+          </span>
+
+          <span style="flex:1; font-size:0.85rem;">
+            <i class="bi bi-images"></i> <%= pl.items ? pl.items.length : 0 %> slides
+          </span>
+
+          <span style="flex:1; font-size:0.85rem;">
+            <% if (pl.shuffle) { %>
+              <span style="color:var(--gh-success-fg);"><i class="bi bi-shuffle"></i> Yes</span>
+            <% } else { %>
+              <span style="color:#888;"><i class="bi bi-arrow-right"></i> Seq</span>
+            <% } %>
+          </span>
+
+          <span style="flex:1.5; font-size:0.8rem; color:#666;">
+            <%= pl.last_update %>
+          </span>
+
+          <span style="width:180px; text-align:right;">
+            <!-- Compose Sequence -->
+            <a href="/playlists/compose/<%= pl.playlist_id %>" class="unit-action" title="Compose Sequence Timeline">
+              <i class="bi bi-music-note-list"></i>
+            </a>
+
+            <!-- SMIL Feed -->
+            <a href="/smil-index?playlist_id=<%= pl.playlist_id %>" target="_blank" class="unit-action" title="Download / Preview SMIL XML">
+              <i class="bi bi-file-earmark-code"></i>
+            </a>
+
+            <!-- Delete -->
+            <form action="/playlists/delete/<%= pl.playlist_id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete playlist <%= pl.playlist_name %>?');">
+              <button type="submit" class="unit-action" style="color:var(--gh-danger-color);" title="Delete Playlist">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </span>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+</main>
+
+<!-- Create Playlist Modal -->
+<div id="createPlaylistModal" class="modal-overlay">
+  <div class="modal-window">
+    <div class="modal-header">
+      <h3 style="display:flex; align-items:center; gap:0.5rem;"><i class="bi bi-collection-play"></i> Create New Playlist</h3>
+      <button type="button" class="close-button" onclick="document.getElementById('createPlaylistModal').classList.remove('active');">&times;</button>
+    </div>
+    <form action="/playlists/create" method="POST">
+      <div class="modal-body">
+        <label>
+          <span>Playlist Name</span>
+          <input type="text" name="playlist_name" required placeholder="e.g. Summer Promotion Campaign" />
+        </label>
+        <label>
+          <span>Playlist Mode</span>
+          <select name="playlist_mode">
+            <option value="master">Master Playlist (Full-screen primary loop)</option>
+            <option value="internal">Internal Announcements</option>
+            <option value="external">External Feed / Web Content</option>
+            <option value="multizone">Multizone Layout (Split Screen Zones)</option>
+            <option value="channel">Video Channel</option>
+          </select>
+        </label>
+        <label style="display:flex; flex-direction:row; align-items:center; gap:0.5rem; margin-top:1rem;">
+          <input type="checkbox" name="shuffle" value="true" />
+          <span>Enable Random Shuffle Playback</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="document.getElementById('createPlaylistModal').classList.remove('active');">Cancel</button>
+        <button type="submit" class="add-unit"><i class="bi bi-check2"></i> Create Playlist</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

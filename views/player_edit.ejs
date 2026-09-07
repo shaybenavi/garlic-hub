@@ -1,0 +1,95 @@
+<%- include('partials/header') %>
+
+<main>
+  <div style="margin-bottom: 1.5rem;">
+    <a href="/player" style="display:inline-flex; align-items:center; gap:0.3rem; font-size:0.9rem; margin-bottom:0.5rem;">
+      <i class="bi bi-arrow-left"></i> Back to Players
+    </a>
+    <h1 style="margin:0; color:var(--gh-primary-color); display:flex; align-items:center; gap:0.5rem;">
+      <i class="bi bi-gear-wide-connected"></i> Edit Player: <%= player.player_name %>
+    </h1>
+    <div style="font-size:0.85rem; color:#666; font-family:monospace;">
+      UUID: <%= player.uuid %>
+    </div>
+  </div>
+
+  <div class="main-element-group" style="max-width: 700px;">
+    <form action="/player/edit/<%= player.player_id %>" method="POST">
+      <fieldset>
+        <legend><i class="bi bi-sliders"></i> Hardware & Connectivity Settings</legend>
+
+        <div class="field-wrapper">
+          <label>
+            <span>Display Name</span>
+            <input type="text" name="player_name" value="<%= player.player_name %>" required />
+          </label>
+        </div>
+
+        <div class="field-wrapper">
+          <label>
+            <span>Hardware Model / Device</span>
+            <input type="text" name="model" value="<%= player.model %>" required />
+          </label>
+        </div>
+
+        <div class="field-wrapper">
+          <label>
+            <span>IP Address</span>
+            <input type="text" name="ip" value="<%= player.ip %>" required />
+          </label>
+        </div>
+
+        <div class="field-wrapper">
+          <label>
+            <span>Display Resolution</span>
+            <input type="text" name="resolution" value="<%= player.resolution %>" required />
+          </label>
+        </div>
+
+        <div class="field-wrapper">
+          <label>
+            <span>Device State</span>
+            <select name="status">
+              <option value="online" <%= player.status === 'online' ? 'selected' : '' %>>Online (Active Broadcasting)</option>
+              <option value="standby" <%= player.status === 'standby' ? 'selected' : '' %>>Standby (Night Schedule / Low Power)</option>
+              <option value="offline" <%= player.status === 'offline' ? 'selected' : '' %>>Offline (Decommissioned / Unreachable)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field-wrapper">
+          <label>
+            <span>Assigned Playlist</span>
+            <select name="playlist_id">
+              <% playlists.forEach(function(pl) { %>
+                <option value="<%= pl.playlist_id %>" <%= player.playlist_id === pl.playlist_id ? 'selected' : '' %>>
+                  <%= pl.playlist_name %> (<%= pl.playlist_mode %>)
+                </option>
+              <% }); %>
+            </select>
+          </label>
+        </div>
+
+        <div class="field-wrapper">
+          <label>
+            <span>Content Polling Refresh Interval (seconds)</span>
+            <input type="number" name="refresh" value="<%= player.refresh %>" min="15" />
+          </label>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem;">
+          <a href="/smil-index?player_id=<%= player.player_id %>" target="_blank" class="button" style="text-decoration:none;">
+            <i class="bi bi-file-earmark-code"></i> Preview Player SMIL Feed
+          </a>
+
+          <div style="display:flex; gap:0.5rem;">
+            <a href="/player" class="button" style="text-decoration:none;">Cancel</a>
+            <button type="submit" class="add-unit"><i class="bi bi-save"></i> Save Changes</button>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
