@@ -101,7 +101,7 @@ class LayoutPreparer extends AbstractPreparer implements PreparerInterface
 	/**
 	 * @return array<string,string|int>
 	 */
-	private function replaceRegion(string|int $screenId, string|int $top, string|int $left, string|int $width, string|int $height, string|int $zIndex, string $bgColor = 'transparent'): array
+	private function replaceRegion(string|int $screenId, string|int $top, string|int $left, string|int $width, string|int $height, string|int $zIndex, string $bgColor = '#000000'): array
 	{
 		return [
 			'SCREEN_ID' => $screenId,
